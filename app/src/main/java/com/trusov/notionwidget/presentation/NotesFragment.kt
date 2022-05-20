@@ -1,13 +1,17 @@
 package com.trusov.notionwidget.presentation
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RemoteViews
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.trusov.notionwidget.App
+import com.trusov.notionwidget.R
+import com.trusov.notionwidget.data.NoteAppWidgetProvider
 import com.trusov.notionwidget.databinding.NotesFragmentBinding
 import com.trusov.notionwidget.di.ViewModelFactory
 import javax.inject.Inject
@@ -46,17 +50,36 @@ class NotesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.loadBlocks()
+
+        val appWidgetManager = AppWidgetManager.getInstance(activity)
+
         viewModel.blocks.observe(viewLifecycleOwner) { texts ->
-            size = texts.size
             binding.tvText.text = texts[0]
             binding.tvText.setOnClickListener {
-                if (index in 0 until size) {
-                    binding.tvText.text = texts[index++]
+                if (index in texts.indices) {
+                    index++
+                    binding.tvText.text = texts[index]
+                    updateWidget(texts[index], appWidgetManager)
                 } else {
                     index = 0
+                    binding.tvText.text = texts[0]
                 }
             }
         }
 
+    }
+
+    private fun updateWidget(
+        text: String,
+        appWidgetManager: AppWidgetManager
+    ) {
+        val remoteViews =
+            RemoteViews(activity?.packageName, R.layout.widget_layout).apply {
+                setTextViewText(R.id.tv_note_text, text)
+            }
+        appWidgetManager.partiallyUpdateAppWidget(
+            NoteAppWidgetProvider.currentAppWidgetId,
+            remoteViews
+        )
     }
 }
