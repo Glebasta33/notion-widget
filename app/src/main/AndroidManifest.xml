@@ -30,6 +30,7 @@
             <meta-data android:name="android.appwidget.provider"
                 android:resource="@xml/app_widget_provider_info" />
         </receiver>
+        <receiver android:name=".data.NoteContentReceiver" />
 
     </application>
 

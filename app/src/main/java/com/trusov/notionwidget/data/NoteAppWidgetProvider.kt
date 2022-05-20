@@ -21,10 +21,12 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
         Log.d("NoteAppWidgetTag", "onUpdate")
         appWidgetIds?.forEach { appWidgetId ->
             currentAppWidgetId = appWidgetId
-            val pendingIntent = PendingIntent.getActivity(
+            val pendingIntent = PendingIntent.getBroadcast(
                 context,
                 0,
-                Intent(context, MainActivity::class.java),
+                Intent(context, NoteContentReceiver::class.java).apply {
+                    putExtra("test", "test from NoteAppWidgetProvider")
+                },
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             Log.d("NoteAppWidgetTag", "appWidgetId = $appWidgetId")
