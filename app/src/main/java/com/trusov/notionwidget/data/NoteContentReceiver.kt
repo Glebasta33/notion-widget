@@ -12,8 +12,11 @@ class NoteContentReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         intent?.let {
-            if (it.hasExtra("test")) {
-                Log.d("NoteContentReceiverTag", "extra test ${it.getStringExtra("test")}")
+            if (it.hasExtra("back")) {
+                Log.d("NoteContentReceiverTag", "${it.getStringExtra("back")}")
+            }
+            if (it.hasExtra("forward")) {
+                Log.d("NoteContentReceiverTag", "${it.getStringExtra("forward")}")
             }
         }
 
