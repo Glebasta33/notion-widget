@@ -51,15 +51,12 @@ class NotesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel.loadBlocks()
 
-        val appWidgetManager = AppWidgetManager.getInstance(activity)
-
         viewModel.blocks.observe(viewLifecycleOwner) { texts ->
             binding.tvText.text = texts[0]
             binding.tvText.setOnClickListener {
                 if (index in texts.indices) {
                     index++
                     binding.tvText.text = texts[index]
-                    updateWidget(texts[index], appWidgetManager)
                 } else {
                     index = 0
                     binding.tvText.text = texts[0]
@@ -69,17 +66,5 @@ class NotesFragment : Fragment() {
 
     }
 
-    private fun updateWidget(
-        text: String,
-        appWidgetManager: AppWidgetManager
-    ) {
-        val remoteViews =
-            RemoteViews(activity?.packageName, R.layout.widget_layout).apply {
-                setTextViewText(R.id.tv_note_text, text)
-            }
-        appWidgetManager.partiallyUpdateAppWidget(
-            NoteAppWidgetProvider.currentAppWidgetId,
-            remoteViews
-        )
-    }
+
 }
