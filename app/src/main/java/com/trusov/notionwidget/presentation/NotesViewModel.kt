@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import com.trusov.notionwidget.R
 import com.trusov.notionwidget.data.local.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
+import com.trusov.notionwidget.domain.use_case.GetDatabaseUseCase
 import com.trusov.notionwidget.domain.use_case.GetPageBlocksUseCase
 import com.trusov.notionwidget.domain.use_case.GetPageIdsUseCase
 import kotlinx.coroutines.*
@@ -16,6 +17,7 @@ import javax.inject.Inject
 class NotesViewModel @Inject constructor(
     private val getPageIdsUseCase: GetPageIdsUseCase,
     private val getPageBlocksUseCase: GetPageBlocksUseCase,
+    private val getDatabaseUseCase: GetDatabaseUseCase,
     private val application: Application,
     private val notesDao: NotesDao
 ) : ViewModel() {
@@ -50,6 +52,14 @@ class NotesViewModel @Inject constructor(
             } else {
                 Log.d("MainActivityTag", "not successful: ${response.message()}")
             }
+
+            val dbDtoResponse = getDatabaseUseCase("9d115e3d5c7749b19858414acf5eabd4")
+            if (dbDtoResponse.isSuccessful) {
+                Log.d("MainActivityTag", "${dbDtoResponse.body()}")
+            } else {
+                Log.d("MainActivityTag", "not successful: ${dbDtoResponse.message()}")
+            }
+
         }
     }
 

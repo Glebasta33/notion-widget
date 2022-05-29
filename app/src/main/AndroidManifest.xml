@@ -14,7 +14,8 @@
         android:theme="@style/Theme.NotionWidget">
         <activity
             android:name=".presentation.MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,8 +31,13 @@
             <meta-data android:name="android.appwidget.provider"
                 android:resource="@xml/app_widget_provider_info" />
         </receiver>
-        <receiver android:name=".data.NoteContentReceiver" />
+        <receiver android:name=".data.NoteContentReceiver"
+            android:enabled="true"
+            android:exported="true"/>
 
+        <service android:name=".data.WidgetLaunchService"
+            android:enabled="true"
+            android:exported="true" />
     </application>
 
 </manifest>

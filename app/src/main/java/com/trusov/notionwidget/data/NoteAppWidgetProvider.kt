@@ -39,10 +39,10 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             )
             setOnClickPendingIntent(
                 R.id.iv_back,
-                PendingIntent.getBroadcast(
+                PendingIntent.getService(
                     context,
                     2,
-                    Intent(context, NoteContentReceiver::class.java).apply {
+                    Intent(context, WidgetLaunchService::class.java).apply {
                         putExtra("back", "back")
                     },
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
@@ -50,10 +50,10 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             )
             setOnClickPendingIntent(
                 R.id.iv_forward,
-                PendingIntent.getBroadcast(
+                PendingIntent.getService(
                     context,
                     3,
-                    Intent(context, NoteContentReceiver::class.java).apply {
+                    Intent(context, WidgetLaunchService::class.java).apply {
                         putExtra("forward", "forward")
                     },
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE

@@ -1,17 +1,13 @@
 package com.trusov.notionwidget.presentation
 
-import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RemoteViews
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.trusov.notionwidget.App
-import com.trusov.notionwidget.R
-import com.trusov.notionwidget.data.NoteAppWidgetProvider
 import com.trusov.notionwidget.databinding.NotesFragmentBinding
 import com.trusov.notionwidget.di.ViewModelFactory
 import javax.inject.Inject

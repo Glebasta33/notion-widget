@@ -43,8 +43,7 @@
             android:layout_below="@id/iv_menu"
             android:padding="12dp"
             android:text="Text in widget Text in widget Text in widget Text in widget Text in widget Text in widget Text in widget"
-            android:textColor="@color/white"
-            android:textSize="18sp" />
+            android:textColor="@color/white"/>
 
 
 </RelativeLayout>
