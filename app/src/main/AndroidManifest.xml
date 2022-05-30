@@ -38,6 +38,10 @@
         <service android:name=".data.WidgetLaunchService"
             android:enabled="true"
             android:exported="true" />
+
+        <service
+            android:name=".WidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
     </application>
 
 </manifest>

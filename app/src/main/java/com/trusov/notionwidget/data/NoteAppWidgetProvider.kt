@@ -5,9 +5,11 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import android.widget.RemoteViews
 import com.trusov.notionwidget.R
+import com.trusov.notionwidget.WidgetService
 import com.trusov.notionwidget.presentation.MainActivity
 
 class NoteAppWidgetProvider : AppWidgetProvider() {
@@ -20,8 +22,16 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
         super.onUpdate(context, appWidgetManager, appWidgetIds)
         appWidgetIds?.forEach { appWidgetId ->
             currentAppWidgetId = appWidgetId
-            Log.d("NoteAppWidgetTag", "appWidgetId = $appWidgetId")
+
+            val serviceIntent = Intent(context, WidgetService::class.java)
+            serviceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+            serviceIntent.data = Uri.parse(serviceIntent.toUri(Intent.URI_INTENT_SCHEME))
+
             val views = setupWidgetLayout(context)
+            views.apply{
+                setRemoteAdapter(R.id.example_widget_stack_view, serviceIntent)
+                setEmptyView(R.id.example_widget_stack_view, R.id.example_widget_empty_view)
+            }
             appWidgetManager?.updateAppWidget(appWidgetId, views)
         }
     }
