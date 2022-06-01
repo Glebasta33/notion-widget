@@ -42,31 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/iv_menu"
             android:padding="12dp"
-            android:text="Text in widget Text in widget Text in widget Text in widget Text in widget Text in widget Text in widget"
             android:textColor="@color/white"/>
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/tv_note_text">
-
-                <StackView
-                    android:id="@+id/example_widget_stack_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:loopViews="true" />
-
-                <TextView
-                    android:id="@+id/example_widget_empty_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@android:color/darker_gray"
-                    android:gravity="center"
-                    android:text="Empty"
-                    android:textColor="@android:color/white"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-        </FrameLayout>
 
 </RelativeLayout>
