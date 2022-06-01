@@ -1,6 +1,7 @@
 package com.trusov.notionwidget.di
 
 import android.app.Application
+import com.trusov.notionwidget.WidgetService
 import com.trusov.notionwidget.data.NoteAppWidgetProvider
 import com.trusov.notionwidget.data.NoteContentReceiver
 import com.trusov.notionwidget.data.WidgetLaunchService
@@ -23,6 +24,7 @@ interface ApplicationComponent {
     fun inject(instance: NoteAppWidgetProvider)
     fun inject(instance: NoteContentReceiver)
     fun inject(instance: WidgetLaunchService)
+    fun inject(instance: WidgetService)
 
     @Component.Factory
     interface Factory {

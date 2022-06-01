@@ -8,34 +8,48 @@ import android.os.SystemClock
 import android.util.Log
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import com.trusov.notionwidget.data.local.NotesDao
+import kotlinx.coroutines.*
+import javax.inject.Inject
 
 class WidgetService : RemoteViewsService() {
 
+    @Inject
+    lateinit var notesDao: NotesDao
+
     override fun onGetViewFactory(intent: Intent?): RemoteViewsFactory {
-        Log.d("WidgetServiceTag", "onGetViewFactory")
-        val appWidgetId = intent?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
-            AppWidgetManager.INVALID_APPWIDGET_ID)
-        val data = arrayListOf(
-            "one", "two", "three", "four",
-            "five", "six", "seven", "eight", "nine", "ten"
+        (this.applicationContext as App).component.inject(this)
+        val appWidgetId = intent?.getIntExtra(
+            AppWidgetManager.EXTRA_APPWIDGET_ID,
+            AppWidgetManager.INVALID_APPWIDGET_ID
         )
-        return WidgetItemFactory(applicationContext, appWidgetId ?: 0, data)
+        return WidgetItemFactory(applicationContext, appWidgetId ?: 0, notesDao)
     }
 
     class WidgetItemFactory(
         private val context: Context,
         private val appWidgetId: Int,
-        private val data: List<String>
+        private val notesDao: NotesDao
     ) : RemoteViewsFactory {
+
+        private lateinit var data: List<String>
+        val scope = CoroutineScope(Dispatchers.IO)
+        private lateinit var job: Job
+
         override fun onCreate() {
-            SystemClock.sleep(500)
+            Log.d("WidgetServiceTag", "onCreate")
+            job = scope.launch {
+                data = notesDao.getNotes().map { it.text }
+                Log.d("WidgetServiceTag", "onCreate. data = ${data.toString()}")
+            }
         }
 
         override fun onDataSetChanged() {
+            Log.d("WidgetServiceTag", "onDataSetChanged")
         }
 
         override fun onDestroy() {
-           // closer data source
+            Log.d("WidgetServiceTag", "onDestroy")
         }
 
         override fun getCount(): Int {
@@ -43,9 +57,13 @@ class WidgetService : RemoteViewsService() {
         }
 
         override fun getViewAt(position: Int): RemoteViews {
+            Log.d("WidgetServiceTag", "getViewAt")
             val views = RemoteViews(context.packageName, R.layout.example_widget_item)
-            views.setTextViewText(R.id.example_widget_item_text, data[position])
-            SystemClock.sleep(500)
+            scope.launch {
+                job.join()
+                Log.d("WidgetServiceTag", "getViewAt. data = ${data.toString()}")
+                views.setTextViewText(R.id.example_widget_item_text, data[position])
+            }
             return views
         }
 

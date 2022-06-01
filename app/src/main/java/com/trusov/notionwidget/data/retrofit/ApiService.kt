@@ -6,7 +6,7 @@ import com.trusov.notionwidget.data.dto.db.DbDto
 import com.trusov.notionwidget.data.dto.filter.CreatedTime
 import com.trusov.notionwidget.data.dto.filter.Filter
 import com.trusov.notionwidget.data.dto.filter.FilterLastWeekDto
-import com.trusov.notionwidget.data.dto.filter.PastWeek
+import com.trusov.notionwidget.data.dto.filter.PastMonth
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -17,7 +17,7 @@ interface ApiService {
         @Path("db") dbId: String,
         @Body filter: FilterLastWeekDto = FilterLastWeekDto(Filter(
             timestamp = "created_time",
-            created_time = CreatedTime(PastWeek())
+            created_time = CreatedTime(PastMonth())
         ))
     ): Response<DbQueryDto>
 

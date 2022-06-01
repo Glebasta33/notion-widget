@@ -27,11 +27,12 @@ class NotesViewModel @Inject constructor(
     }
     private val scope = CoroutineScope(Dispatchers.IO + exceptionHandler)
 
-    private val _blocks = MutableLiveData<List<String>>()
-    val blocks: LiveData<List<String>> = _blocks
+    private val _liveData = MutableLiveData<State>()
+    val liveData: LiveData<State> = _liveData
 
     fun loadBlocks() {
         scope.launch {
+            _liveData.postValue(Loading)
             val response = getPageIdsUseCase(application.getString(R.string.zettel_db_id))
             if (response.isSuccessful) {
                 val ids: List<String>? = response.body()?.results?.map { it.id }
@@ -45,7 +46,7 @@ class NotesViewModel @Inject constructor(
                     texts.add(text)
                     noteDbModels.add(NoteDbModel(text, 0))
                 }
-                _blocks.postValue(texts)
+                _liveData.postValue(Result(texts))
                 notesDao.clear()
                 notesDao.insertNotes(noteDbModels)
                 Log.d("MainActivityTag", "content: ${texts.toString()}")

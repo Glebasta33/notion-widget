@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.trusov.notionwidget.App
@@ -47,20 +48,31 @@ class NotesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel.loadBlocks()
 
-        viewModel.blocks.observe(viewLifecycleOwner) { texts ->
-            binding.tvText.text = texts[0]
-            binding.tvText.setOnClickListener {
-                if (index in texts.indices) {
-                    index++
-                    binding.tvText.text = texts[index]
-                } else {
-                    index = 0
-                    binding.tvText.text = texts[0]
+        viewModel.liveData.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is Loading -> {
+                    binding.progressBar.isGone = false
+                }
+                is Result -> {
+                    binding.progressBar.isGone = true
+                    setupTexts(state.texts)
                 }
             }
         }
 
     }
 
+    private fun setupTexts(texts: List<String>) {
+        binding.tvText.text = texts[0]
+        binding.tvText.setOnClickListener {
+            if (index in texts.indices) {
+                index++
+                binding.tvText.text = texts[index]
+            } else {
+                index = 0
+                binding.tvText.text = texts[0]
+            }
+        }
+    }
 
 }

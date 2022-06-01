@@ -14,6 +14,14 @@ import com.trusov.notionwidget.presentation.MainActivity
 
 class NoteAppWidgetProvider : AppWidgetProvider() {
 
+    private val data = listOf(
+        "NoteAppWidgetProvider-1",
+        "NoteAppWidgetProvider-2",
+        "NoteAppWidgetProvider-3",
+        "NoteAppWidgetProvider-4",
+        "NoteAppWidgetProvider-5"
+    )
+
     override fun onUpdate(
         context: Context?,
         appWidgetManager: AppWidgetManager?,
