@@ -5,10 +5,10 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.widget.RemoteViews
 import com.trusov.notionwidget.App
 import com.trusov.notionwidget.R
+import com.trusov.notionwidget.data.local.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
 import com.trusov.notionwidget.presentation.MainActivity
 import kotlinx.coroutines.CoroutineScope
@@ -21,58 +21,37 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
     @Inject
     lateinit var notesDao: NotesDao
 
-    override fun onUpdate(
-        context: Context?,
-        appWidgetManager: AppWidgetManager?,
-        appWidgetIds: IntArray?
-    ) {
-        super.onUpdate(context, appWidgetManager, appWidgetIds)
-        appWidgetIds?.forEach { appWidgetId ->
-            updateWidget(context, appWidgetManager, appWidgetId, "onUpdate")
+    override fun onUpdate(context: Context?, manager: AppWidgetManager?, ids: IntArray?) {
+        super.onUpdate(context, manager, ids)
+        ids?.forEach { id ->
+            (context?.applicationContext as App).component.inject(this)
+            CoroutineScope(Dispatchers.IO).launch {
+                val notes = notesDao.getNotes()
+                updateWidget(context, manager, id, notes[0].text)
+            }
         }
     }
 
     override fun onReceive(context: Context?, intent: Intent?) {
         (context?.applicationContext as App).component.inject(this)
         super.onReceive(context, intent)
-        val widgetId = intent?.extras?.getInt(
+        val id = intent?.extras?.getInt(
             AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID
         )
         if (intent?.action == ACTION_WIDGET_BACK || intent?.action == ACTION_WIDGET_NEXT) {
-
             CoroutineScope(Dispatchers.IO).launch {
                 val notes = notesDao.getNotes()
-                var text = ""
-                if (intent.action == ACTION_WIDGET_BACK) {
-                    if (index == 0) {
-                        index = notes.size - 1
-                    } else {
-                        index--
-                    }
-                    text = notes[index].text
+                val text = when (intent.action) {
+                    ACTION_WIDGET_BACK -> getPreviousNote(notes)
+                    ACTION_WIDGET_NEXT -> getNextNote(notes)
+                    else -> ""
                 }
-                if (intent.action == ACTION_WIDGET_NEXT) {
-                    if (index == (notes.size - 1)) {
-                        index = 0
-                    } else {
-                        index++
-                    }
-                    text = notes[index].text
-                }
-
-                widgetId?.let { it ->
-                    if (it != AppWidgetManager.INVALID_APPWIDGET_ID) {
-                        updateWidget(
-                            context,
-                            AppWidgetManager.getInstance(context),
-                            it,
-                            text
-                        )
-                    }
+                val manager = AppWidgetManager.getInstance(context)
+                if (id != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                    updateWidget(context, manager, id!!, text)
                 }
             }
-
         }
     }
 
@@ -93,7 +72,7 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
                     R.id.iv_menu,
                     PendingIntent.getActivity(
                         context,
-                        1,
+                        appWidgetId,
                         Intent(context, MainActivity::class.java),
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
@@ -102,7 +81,7 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
                     R.id.iv_back,
                     PendingIntent.getBroadcast(
                         context,
-                        2,
+                        appWidgetId,
                         Intent(context, NoteAppWidgetProvider::class.java).apply {
                             putExtra("back", "back")
                             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
@@ -115,7 +94,7 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
                     R.id.iv_forward,
                     PendingIntent.getBroadcast(
                         context,
-                        3,
+                        appWidgetId,
                         Intent(context, NoteAppWidgetProvider::class.java).apply {
                             putExtra("forward", "forward")
                             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
@@ -126,6 +105,25 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
                 )
             }
             appWidgetManager?.updateAppWidget(appWidgetId, views)
+        }
+
+
+        private fun getPreviousNote(notes: List<NoteDbModel>): String {
+            if (index == 0) {
+                index = notes.size - 1
+            } else {
+                index--
+            }
+            return notes[index].text
+        }
+
+        private fun getNextNote(notes: List<NoteDbModel>): String {
+            if (index == (notes.size - 1)) {
+                index = 0
+            } else {
+                index++
+            }
+            return notes[index].text
         }
     }
 
