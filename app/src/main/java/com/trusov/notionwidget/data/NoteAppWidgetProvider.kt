@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.widget.RemoteViews
 import com.trusov.notionwidget.App
 import com.trusov.notionwidget.R
@@ -38,27 +39,29 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
         val id = intent?.extras?.getInt(
             AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID
-        )
+        ) ?: 0
         if (intent?.action == ACTION_WIDGET_BACK || intent?.action == ACTION_WIDGET_NEXT) {
             CoroutineScope(Dispatchers.IO).launch {
                 val notes = notesDao.getNotes()
                 val text = when (intent.action) {
-                    ACTION_WIDGET_BACK -> getPreviousNote(notes)
-                    ACTION_WIDGET_NEXT -> getNextNote(notes)
+                    ACTION_WIDGET_BACK -> getPreviousNote(notes, id)
+                    ACTION_WIDGET_NEXT -> getNextNote(notes, id)
                     else -> ""
                 }
                 val manager = AppWidgetManager.getInstance(context)
                 if (id != AppWidgetManager.INVALID_APPWIDGET_ID) {
-                    updateWidget(context, manager, id!!, text)
+                    updateWidget(context, manager, id, text)
                 }
             }
+            Log.d("AppWidgetProviderTag", "onReceive. k: ${indexes.keys}. v: ${indexes.values}")
         }
     }
 
     companion object {
         private const val ACTION_WIDGET_BACK = "com.trusov.notionwidget.widget_back"
         private const val ACTION_WIDGET_NEXT = "com.trusov.notionwidget.widget_next"
-        private var index = 0
+        private const val INDEX_KEY = "index_key"
+        private val indexes = mutableMapOf<String, Int>()
 
         private fun updateWidget(
             context: Context?,
@@ -83,7 +86,6 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
                         context,
                         appWidgetId,
                         Intent(context, NoteAppWidgetProvider::class.java).apply {
-                            putExtra("back", "back")
                             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                             action = ACTION_WIDGET_BACK
                         },
@@ -96,7 +98,6 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
                         context,
                         appWidgetId,
                         Intent(context, NoteAppWidgetProvider::class.java).apply {
-                            putExtra("forward", "forward")
                             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                             action = ACTION_WIDGET_NEXT
                         },
@@ -108,23 +109,39 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
         }
 
 
-        private fun getPreviousNote(notes: List<NoteDbModel>): String {
+        private fun getPreviousNote(notes: List<NoteDbModel>, id: Int): String {
+            if (!indexes.containsKey("$INDEX_KEY-$id")) {
+                indexes["$INDEX_KEY-$id"] = 0
+            }
+            var index = indexes["$INDEX_KEY-$id"] ?: 0
             if (index == 0) {
                 index = notes.size - 1
             } else {
                 index--
             }
+            indexes["$INDEX_KEY-$id"] = index
             return notes[index].text
         }
 
-        private fun getNextNote(notes: List<NoteDbModel>): String {
+        private fun getNextNote(notes: List<NoteDbModel>, id: Int): String {
+            if (!indexes.containsKey("$INDEX_KEY-$id")) {
+                indexes["$INDEX_KEY-$id"] = 0
+            }
+            var index = indexes["$INDEX_KEY-$id"] ?: 0
             if (index == (notes.size - 1)) {
                 index = 0
             } else {
                 index++
             }
+            indexes["$INDEX_KEY-$id"] = index
             return notes[index].text
         }
     }
 
+    override fun onDeleted(context: Context?, ids: IntArray?) {
+        super.onDeleted(context, ids)
+        ids?.forEach { id ->
+            indexes.remove("$INDEX_KEY-$id")
+        }
+    }
 }
