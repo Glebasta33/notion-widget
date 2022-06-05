@@ -50,7 +50,8 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
                 val text = when (intent?.action) {
                     ACTION_WIDGET_BACK -> getPreviousNote(notes, id)
                     ACTION_WIDGET_NEXT -> getNextNote(notes, id)
-                    else -> notes[0].text
+                    else -> notes[indexes["$INDEX_KEY-$id"] ?: 0].text
+
                 }
                 val manager = AppWidgetManager.getInstance(context)
                 updateWidget(context, manager, id, text)
@@ -58,6 +59,8 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
         }
         Log.d("myLogs", "onReceive. k: ${indexes.keys}. v: ${indexes.values}")
     }
+
+
 
     companion object {
         private const val ACTION_WIDGET_BACK = "com.trusov.notionwidget.widget_back"
