@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.trusov.notionwidget">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".App"
@@ -12,6 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.NotionWidget">
+
         <activity
             android:name=".presentation.MainActivity"
             android:exported="true"
@@ -23,25 +24,27 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".data.NoteAppWidgetProvider"
+        <activity
+            android:name=".presentation.ConfigActivity"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".data.NoteAppWidgetProvider"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
-            <meta-data android:name="android.appwidget.provider"
+
+            <meta-data
+                android:name="android.appwidget.provider"
                 android:resource="@xml/app_widget_provider_info" />
         </receiver>
-        <receiver android:name=".data.NoteContentReceiver"
-            android:enabled="true"
-            android:exported="true"/>
 
-        <service android:name=".data.WidgetLaunchService"
-            android:enabled="true"
-            android:exported="true" />
 
-        <service
-            android:name=".WidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
     </application>
 
 </manifest>

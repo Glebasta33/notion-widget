@@ -5,12 +5,15 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
+import android.graphics.Color
 import android.util.Log
 import android.widget.RemoteViews
 import com.trusov.notionwidget.App
 import com.trusov.notionwidget.R
 import com.trusov.notionwidget.data.local.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
+import com.trusov.notionwidget.presentation.ConfigActivity
 import com.trusov.notionwidget.presentation.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +32,7 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             CoroutineScope(Dispatchers.IO).launch {
                 val notes = notesDao.getNotes()
                 updateWidget(context, manager, id, notes[0].text)
+                Log.d("myLogs", "onUpdate")
             }
         }
     }
@@ -40,21 +44,19 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID
         ) ?: 0
-        if (intent?.action == ACTION_WIDGET_BACK || intent?.action == ACTION_WIDGET_NEXT) {
+        if (id != AppWidgetManager.INVALID_APPWIDGET_ID) {
             CoroutineScope(Dispatchers.IO).launch {
                 val notes = notesDao.getNotes()
-                val text = when (intent.action) {
+                val text = when (intent?.action) {
                     ACTION_WIDGET_BACK -> getPreviousNote(notes, id)
                     ACTION_WIDGET_NEXT -> getNextNote(notes, id)
-                    else -> ""
+                    else -> notes[0].text
                 }
                 val manager = AppWidgetManager.getInstance(context)
-                if (id != AppWidgetManager.INVALID_APPWIDGET_ID) {
-                    updateWidget(context, manager, id, text)
-                }
+                updateWidget(context, manager, id, text)
             }
-            Log.d("AppWidgetProviderTag", "onReceive. k: ${indexes.keys}. v: ${indexes.values}")
         }
+        Log.d("myLogs", "onReceive. k: ${indexes.keys}. v: ${indexes.values}")
     }
 
     companion object {
@@ -69,14 +71,31 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             appWidgetId: Int,
             content: String
         ) {
+            val sp =
+                context?.getSharedPreferences(ConfigActivity.WIDGET_PREF, Context.MODE_PRIVATE)
+            val color = sp?.getInt("${ConfigActivity.WIDGET_COLOR}-$appWidgetId", 0) ?: Color.DKGRAY
+
+            Log.d("myLogs", "updateWidget. color: $color, content: $content")
             val views = RemoteViews(context?.packageName, R.layout.widget_layout).apply {
                 setTextViewText(R.id.tv_note_text, content)
+                setInt(R.id.tv_note_text, "setBackgroundColor", color)
                 setOnClickPendingIntent(
                     R.id.iv_menu,
                     PendingIntent.getActivity(
                         context,
                         appWidgetId,
                         Intent(context, MainActivity::class.java),
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                )
+                setOnClickPendingIntent(
+                    R.id.iv_settings,
+                    PendingIntent.getActivity(
+                        context,
+                        appWidgetId,
+                        Intent(context, ConfigActivity::class.java).apply {
+                            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                        },
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
                 )

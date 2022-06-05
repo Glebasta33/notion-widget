@@ -4,45 +4,55 @@
     android:layout_height="match_parent"
     android:background="@drawable/widget_background">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@drawable/widget_bar_background"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/widget_bar_background" />
 
-        <ImageView
-            android:id="@+id/iv_menu"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_margin="12dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true"
-            android:background="@drawable/ic_menu"/>
+    <ImageView
+        android:id="@+id/iv_menu"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="12dp"
+        android:background="@drawable/ic_menu" />
 
-        <ImageView
-            android:id="@+id/iv_back"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_margin="12dp"
-            android:layout_alignParentTop="true"
-            android:layout_toStartOf="@id/iv_forward"
-            android:background="@drawable/ic_arrow_back"/>
+    <ImageView
+        android:id="@+id/iv_settings"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/iv_menu"
+        android:layout_margin="12dp"
+        android:background="@drawable/ic_settings" />
 
-        <ImageView
-            android:id="@+id/iv_forward"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_margin="12dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:background="@drawable/ic_arrow_forward"/>
+    <ImageView
+        android:id="@+id/iv_back"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentTop="true"
+        android:layout_margin="12dp"
+        android:layout_toStartOf="@id/iv_forward"
+        android:background="@drawable/ic_arrow_back" />
 
-        <TextView
-            android:id="@+id/tv_note_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/iv_menu"
-            android:padding="12dp"
-            android:textColor="@color/white"/>
+    <ImageView
+        android:id="@+id/iv_forward"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="12dp"
+        android:background="@drawable/ic_arrow_forward" />
+
+    <TextView
+        android:id="@+id/tv_note_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/iv_menu"
+        android:padding="12dp"
+        android:scrollbars="vertical"
+        android:textColor="@color/white" />
 
 
 </RelativeLayout>
