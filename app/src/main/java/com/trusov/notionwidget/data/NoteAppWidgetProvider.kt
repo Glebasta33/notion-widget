@@ -81,7 +81,7 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             Log.d("myLogs", "updateWidget. color: $color, content: $content")
             val views = RemoteViews(context?.packageName, R.layout.widget_layout).apply {
                 setTextViewText(R.id.tv_note_text, content)
-                setInt(R.id.tv_note_text, "setBackgroundColor", color)
+                setInt(R.id.widget_layout, "setBackgroundResource", getBackgroundDrawable(color))
                 setOnClickPendingIntent(
                     R.id.iv_menu,
                     PendingIntent.getActivity(
@@ -130,6 +130,14 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             appWidgetManager?.updateAppWidget(appWidgetId, views)
         }
 
+        private fun getBackgroundDrawable(color: Int): Int {
+            return when(color) {
+                Color.DKGRAY -> R.drawable.widget_background
+                Color.GREEN -> R.drawable.widget_background_green
+                Color.BLUE -> R.drawable.widget_background_blue
+                else -> R.drawable.widget_background
+            }
+        }
 
         private fun getPreviousNote(notes: List<NoteDbModel>, id: Int): String {
             if (!indexes.containsKey("$INDEX_KEY-$id")) {

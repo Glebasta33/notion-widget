@@ -63,7 +63,7 @@ class ConfigActivity : AppCompatActivity() {
     private fun getSelectedColor(id: Int) {
         color = when (id) {
             R.id.radioRed -> {
-                Color.RED
+                Color.DKGRAY
             }
             R.id.radioGreen -> {
                 Color.GREEN
