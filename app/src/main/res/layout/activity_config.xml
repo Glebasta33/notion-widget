@@ -5,6 +5,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="40dp">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Colors:"/>
     <RadioGroup
         android:id="@+id/rgColor"
         android:layout_width="wrap_content"
@@ -31,6 +36,36 @@
             android:text="Blue">
         </RadioButton>
     </RadioGroup>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Text size:"/>    <RadioGroup
+    android:id="@+id/rgTextSizes"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_gravity="center">
+    <RadioButton
+        android:id="@+id/radioSizeSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="Small">
+    </RadioButton>
+    <RadioButton
+        android:id="@+id/radioSizeMedium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Medium">
+    </RadioButton>
+    <RadioButton
+        android:id="@+id/radioSizeBig"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Big">
+    </RadioButton>
+</RadioGroup>
     <Button
         android:id="@+id/buttonSaveConfig"
         android:layout_width="wrap_content"

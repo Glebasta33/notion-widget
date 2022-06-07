@@ -32,7 +32,6 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             CoroutineScope(Dispatchers.IO).launch {
                 val notes = notesDao.getNotes()
                 updateWidget(context, manager, id, notes[0].text)
-                Log.d("myLogs", "onUpdate")
             }
         }
     }
@@ -51,7 +50,6 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
                     ACTION_WIDGET_BACK -> getPreviousNote(notes, id)
                     ACTION_WIDGET_NEXT -> getNextNote(notes, id)
                     else -> notes[indexes["$INDEX_KEY-$id"] ?: 0].text
-
                 }
                 val manager = AppWidgetManager.getInstance(context)
                 updateWidget(context, manager, id, text)
@@ -77,10 +75,12 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             val sp =
                 context?.getSharedPreferences(ConfigActivity.WIDGET_PREF, Context.MODE_PRIVATE)
             val color = sp?.getInt("${ConfigActivity.WIDGET_COLOR}-$appWidgetId", 0) ?: Color.DKGRAY
+            val textSize = sp?.getInt("${ConfigActivity.WIDGET_TEXT_SIZE}-$appWidgetId", 0) ?: 14
 
             Log.d("myLogs", "updateWidget. color: $color, content: $content")
             val views = RemoteViews(context?.packageName, R.layout.widget_layout).apply {
                 setTextViewText(R.id.tv_note_text, content)
+                setFloat(R.id.tv_note_text, "setTextSize", textSize.toFloat())
                 setInt(R.id.widget_layout, "setBackgroundResource", getBackgroundDrawable(color))
                 setOnClickPendingIntent(
                     R.id.iv_menu,
