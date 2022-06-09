@@ -6,12 +6,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.trusov.notionwidget.R
+import com.trusov.notionwidget.data.dto.IdDto
 import com.trusov.notionwidget.data.local.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
 import com.trusov.notionwidget.domain.use_case.GetDatabaseUseCase
 import com.trusov.notionwidget.domain.use_case.GetPageBlocksUseCase
 import com.trusov.notionwidget.domain.use_case.GetPageIdsUseCase
-import kotlinx.coroutines.*
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.schedulers.Schedulers
 import javax.inject.Inject
 
 class NotesViewModel @Inject constructor(
@@ -22,50 +25,35 @@ class NotesViewModel @Inject constructor(
     private val notesDao: NotesDao
 ) : ViewModel() {
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.d("MainActivityTag", "exceptionHandler ${throwable.message}")
-    }
-    private val scope = CoroutineScope(Dispatchers.IO + exceptionHandler)
+    private val TAG = "NotesViewModelTag"
+    private val ids = getPageIdsUseCase(application.resources.getString(R.string.zettel_db_id))
 
-    private val _liveData = MutableLiveData<State>()
-    val liveData: LiveData<State> = _liveData
+    private val _texts = MutableLiveData<List<String>>()
+    val texts: LiveData<List<String>> = _texts
 
-    fun loadBlocks() {
-        scope.launch {
-            _liveData.postValue(Loading)
-            val response = getPageIdsUseCase(application.getString(R.string.zettel_db_id))
-            if (response.isSuccessful) {
-                val ids: List<String>? = response.body()?.results?.map { it.id }
-                val texts = mutableListOf<String>()
-                val noteDbModels = mutableListOf<NoteDbModel>()
-                ids?.forEach {
-                    val text =
-                        getPageBlocksUseCase(it)
-                            .body()?.results?.get(0)?.paragraph?.rich_text?.get(0)?.plain_text
-                            ?: ""
-                    texts.add(text)
-                    noteDbModels.add(NoteDbModel(text, 0))
-                }
-                _liveData.postValue(Result(texts))
-                notesDao.clear()
-                notesDao.insertNotes(noteDbModels)
-                Log.d("MainActivityTag", "content: ${texts.toString()}")
-            } else {
-                Log.d("MainActivityTag", "not successful: ${response.message()}")
-            }
+    val db = notesDao.getNotes()
 
-            val dbDtoResponse = getDatabaseUseCase("9d115e3d5c7749b19858414acf5eabd4")
-            if (dbDtoResponse.isSuccessful) {
-                Log.d("MainActivityTag", "${dbDtoResponse.body()}")
-            } else {
-                Log.d("MainActivityTag", "not successful: ${dbDtoResponse.message()}")
-            }
+    fun getContent() {
+        ids.subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
+            .subscribe({
+                        notesDao.clear()
+                       it.results.forEach { idDto ->
+                            getPageBlocksUseCase(idDto.id)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(Schedulers.io())
+                                .subscribe { blockDto ->
+                                    val text = blockDto.results[0].paragraph.rich_text[0].plain_text
+                                    notesDao.insertNote(NoteDbModel(text, 0))
+                                }
+                       }
+            }, {
+                Log.d(TAG, it.message ?: "Error")
+            }, {
+                Log.d(TAG, "Completed")
+            })
 
-        }
+
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        scope.cancel()
-    }
 }

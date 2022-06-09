@@ -5,21 +5,23 @@ import com.trusov.notionwidget.data.dto.block.BlockResponseDto
 import com.trusov.notionwidget.data.dto.db.DbDto
 import com.trusov.notionwidget.data.retrofit.ApiService
 import com.trusov.notionwidget.domain.repository.Repository
+import io.reactivex.rxjava3.core.Observable
 import retrofit2.Response
 import javax.inject.Inject
 
 class RepositoryImpl @Inject constructor(
     private val apiService: ApiService
 ) : Repository {
-    override suspend fun getPageIds(dbId: String): Response<DbQueryDto> {
+
+    override fun getPageIds(dbId: String): Observable<DbQueryDto> {
         return apiService.getPageIds(dbId)
     }
 
-    override suspend fun getPageBlocks(pageId: String): Response<BlockResponseDto> {
+    override fun getPageBlocks(pageId: String): Observable<BlockResponseDto> {
         return apiService.getPageBlocks(pageId)
     }
 
-    override suspend fun getDatabase(dbId: String): Response<DbDto> {
+    override fun getDatabase(dbId: String): Observable<DbDto> {
         return apiService.getDatabase(dbId)
     }
 

@@ -6,5 +6,5 @@ import javax.inject.Inject
 class GetPageBlocksUseCase @Inject constructor(
     private val repository: Repository
 ) {
-    suspend operator fun invoke(pageId: String) = repository.getPageBlocks(pageId)
+    operator fun invoke(pageId: String) = repository.getPageBlocks(pageId)
 }

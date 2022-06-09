@@ -15,6 +15,8 @@ import com.trusov.notionwidget.data.local.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
 import com.trusov.notionwidget.presentation.ConfigActivity
 import com.trusov.notionwidget.presentation.MainActivity
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,10 +31,13 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
         super.onUpdate(context, manager, ids)
         ids?.forEach { id ->
             (context?.applicationContext as App).component.inject(this)
-            CoroutineScope(Dispatchers.IO).launch {
-                val notes = notesDao.getNotes()
-                updateWidget(context, manager, id, notes[0].text)
-            }
+            notesDao.getNotes()
+                .observeOn(Schedulers.io())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe { notes ->
+                    updateWidget(context, manager, id, notes[0].text)
+                }
+
         }
     }
 
@@ -44,21 +49,21 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             AppWidgetManager.INVALID_APPWIDGET_ID
         ) ?: 0
         if (id != AppWidgetManager.INVALID_APPWIDGET_ID) {
-            CoroutineScope(Dispatchers.IO).launch {
-                val notes = notesDao.getNotes()
-                val text = when (intent?.action) {
-                    ACTION_WIDGET_BACK -> getPreviousNote(notes, id)
-                    ACTION_WIDGET_NEXT -> getNextNote(notes, id)
-                    else -> notes[indexes["$INDEX_KEY-$id"] ?: 0].text
+            notesDao.getNotes()
+                .observeOn(Schedulers.io())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe { notes ->
+                    val text = when (intent?.action) {
+                        ACTION_WIDGET_BACK -> getPreviousNote(notes, id)
+                        ACTION_WIDGET_NEXT -> getNextNote(notes, id)
+                        else -> notes[indexes["$INDEX_KEY-$id"] ?: 0].text
+                    }
+                    val manager = AppWidgetManager.getInstance(context)
+                    updateWidget(context, manager, id, text)
                 }
-                val manager = AppWidgetManager.getInstance(context)
-                updateWidget(context, manager, id, text)
-            }
         }
         Log.d("myLogs", "onReceive. k: ${indexes.keys}. v: ${indexes.values}")
     }
-
-
 
     companion object {
         private const val ACTION_WIDGET_BACK = "com.trusov.notionwidget.widget_back"
@@ -131,7 +136,7 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
         }
 
         private fun getBackgroundDrawable(color: Int): Int {
-            return when(color) {
+            return when (color) {
                 Color.DKGRAY -> R.drawable.widget_background
                 Color.GREEN -> R.drawable.widget_background_green
                 Color.BLUE -> R.drawable.widget_background_blue

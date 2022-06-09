@@ -2,6 +2,7 @@ package com.trusov.notionwidget.presentation
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.trusov.notionwidget.App
 import com.trusov.notionwidget.databinding.NotesFragmentBinding
 import com.trusov.notionwidget.di.ViewModelFactory
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.schedulers.Schedulers
 import javax.inject.Inject
 
 class NotesFragment : Fragment() {
@@ -46,19 +50,16 @@ class NotesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.loadBlocks()
-
-        viewModel.liveData.observe(viewLifecycleOwner) { state ->
-            when (state) {
-                is Loading -> {
-                    binding.progressBar.isGone = false
-                }
-                is Result -> {
-                    binding.progressBar.isGone = true
-                    setupTexts(state.texts)
-                }
-            }
-        }
+        viewModel.getContent()
+        viewModel.db
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ models ->
+                val texts = models.map { it.text }
+                setupTexts(texts)
+            }, {
+                Log.d("NotesFragmentTag", "onError: ${it.message}")
+            })
 
     }
 
@@ -66,8 +67,8 @@ class NotesFragment : Fragment() {
         binding.tvText.text = texts[0]
         binding.tvText.setOnClickListener {
             if (index in texts.indices) {
-                index++
                 binding.tvText.text = texts[index]
+                index++
             } else {
                 index = 0
                 binding.tvText.text = texts[0]
