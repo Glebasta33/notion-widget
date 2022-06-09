@@ -2,6 +2,7 @@ package com.trusov.notionwidget.data.retrofit
 
 import android.app.Application
 import com.trusov.notionwidget.R
+import hu.akarnokd.rxjava3.retrofit.RxJava3CallAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import retrofit2.Retrofit
@@ -26,6 +27,7 @@ class ApiFactory @Inject constructor(
 
     private val retrofit = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())
+        .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
         .baseUrl(BASE_URL)
         .client(client)
         .build()

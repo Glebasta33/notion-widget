@@ -7,28 +7,29 @@ import com.trusov.notionwidget.data.dto.filter.CreatedTime
 import com.trusov.notionwidget.data.dto.filter.Filter
 import com.trusov.notionwidget.data.dto.filter.FilterLastWeekDto
 import com.trusov.notionwidget.data.dto.filter.PastMonth
+import io.reactivex.rxjava3.core.Observable
 import retrofit2.Response
 import retrofit2.http.*
 
 interface ApiService {
 
     @POST("databases/{db}/query")
-    suspend fun getPageIds(
+    fun getPageIds(
         @Path("db") dbId: String,
         @Body filter: FilterLastWeekDto = FilterLastWeekDto(Filter(
             timestamp = "created_time",
             created_time = CreatedTime(PastMonth())
         ))
-    ): Response<DbQueryDto>
+    ): Observable<DbQueryDto>
 
     @GET("blocks/{pageId}/children")
-    suspend fun getPageBlocks(
+    fun getPageBlocks(
         @Path("pageId") pageId: String
-    ): Response<BlockResponseDto>
+    ): Observable<BlockResponseDto>
 
     @GET("databases/{db}")
-    suspend fun getDatabase(
+    fun getDatabase(
         @Path("db") dbId: String
-    ): Response<DbDto>
+    ): Observable<DbDto>
 
 }
