@@ -7,10 +7,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.net.Uri
 import android.util.Log
 import android.widget.RemoteViews
 import com.trusov.notionwidget.App
 import com.trusov.notionwidget.R
+import com.trusov.notionwidget.data.WidgetService.Companion.CONTENT
 import com.trusov.notionwidget.data.local.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
 import com.trusov.notionwidget.presentation.ConfigActivity
@@ -34,9 +36,11 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             notesDao.getNotes()
                 .observeOn(Schedulers.io())
                 .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe { notes ->
+                .subscribe ({ notes ->
                     updateWidget(context, manager, id, notes[0].text)
-                }
+                }, {
+                    Log.e("myLogs", it.message ?: "onError")
+                })
 
         }
     }
@@ -52,7 +56,7 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             notesDao.getNotes()
                 .observeOn(Schedulers.io())
                 .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe { notes ->
+                .subscribe ({ notes ->
                     val text = when (intent?.action) {
                         ACTION_WIDGET_BACK -> getPreviousNote(notes, id)
                         ACTION_WIDGET_NEXT -> getNextNote(notes, id)
@@ -60,7 +64,9 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
                     }
                     val manager = AppWidgetManager.getInstance(context)
                     updateWidget(context, manager, id, text)
-                }
+                }, {
+                    Log.e("myLogs", it.message ?: "onError")
+                })
         }
         Log.d("myLogs", "onReceive. k: ${indexes.keys}. v: ${indexes.values}")
     }
@@ -84,9 +90,12 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
 
             Log.d("myLogs", "updateWidget. color: $color, content: $content")
             val views = RemoteViews(context?.packageName, R.layout.widget_layout).apply {
-                setTextViewText(R.id.tv_note_text, content)
-                setFloat(R.id.tv_note_text, "setTextSize", textSize.toFloat())
+//                setFloat(R.id.tv_note_text, "setTextSize", textSize.toFloat())
                 setInt(R.id.widget_layout, "setBackgroundResource", getBackgroundDrawable(color))
+                setRemoteAdapter(R.id.lvTextView, Intent(context, WidgetService::class.java).apply {
+                    putExtra(CONTENT, content)
+                    data = Uri.parse(this.toUri(Intent.URI_INTENT_SCHEME))
+                })
                 setOnClickPendingIntent(
                     R.id.iv_menu,
                     PendingIntent.getActivity(
@@ -155,6 +164,7 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
                 index--
             }
             indexes["$INDEX_KEY-$id"] = index
+            Log.d("myLogs", "getPreviousNote. index: $index")
             return notes[index].text
         }
 
@@ -169,6 +179,7 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
                 index++
             }
             indexes["$INDEX_KEY-$id"] = index
+            Log.d("myLogs", "getNextNote. index: $index")
             return notes[index].text
         }
     }

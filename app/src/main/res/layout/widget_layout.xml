@@ -46,14 +46,20 @@
         android:layout_margin="12dp"
         android:background="@drawable/ic_arrow_forward" />
 
-    <TextView
+<!--    <TextView
         android:id="@+id/tv_note_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/iv_menu"
         android:padding="12dp"
         android:scrollbars="vertical"
-        android:textColor="@color/white" />
+        android:textColor="@color/white" />-->
 
+        <ListView
+            android:id="@+id/lvTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/iv_menu"
+            android:padding="12dp"/>
 
 </RelativeLayout>
