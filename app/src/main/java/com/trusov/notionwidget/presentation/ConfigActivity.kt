@@ -77,10 +77,10 @@ class ConfigActivity : AppCompatActivity() {
 
     private fun setTextSize(id: Int) {
         textSize = when (id) {
-            R.id.radioSizeSmall -> 14
-            R.id.radioSizeMedium -> 16
-            R.id.radioSizeBig -> 20
-            else -> 14
+            R.id.radioSizeSmall -> SMALL_TEXT_SIZE
+            R.id.radioSizeMedium -> MEDIUM_TEXT_SIZE
+            R.id.radioSizeBig -> BIG_TEXT_SIZE
+            else -> SMALL_TEXT_SIZE
         }
     }
 
@@ -91,6 +91,10 @@ class ConfigActivity : AppCompatActivity() {
         const val WIDGET_TEXT_SIZE = "widget_text_size_"
         const val CHECKED_COLOR_BTN = "checked_color_btn"
         const val CHECKED_TEXT_SIZE_BTN = "checked_text_size_btn"
+
+        const val SMALL_TEXT_SIZE = 14
+        const val MEDIUM_TEXT_SIZE = 16
+        const val BIG_TEXT_SIZE = 20
 
         private var widgetId = AppWidgetManager.INVALID_APPWIDGET_ID
         private var resultValue: Intent? = null
