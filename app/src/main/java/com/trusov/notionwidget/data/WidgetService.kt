@@ -6,11 +6,11 @@ import android.widget.RemoteViewsService
 
 class WidgetService : RemoteViewsService() {
     override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
-        Log.d("NewClassesTag", "WidgetService. intent: ${intent.action?.toString()}")
         return ListProvider(this.applicationContext, intent)
     }
 
     companion object {
         const val CONTENT = "content"
+        const val TEXT_SIZE = "text_size"
     }
 }

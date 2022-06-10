@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.net.Uri
 import android.util.Log
@@ -13,15 +12,14 @@ import android.widget.RemoteViews
 import com.trusov.notionwidget.App
 import com.trusov.notionwidget.R
 import com.trusov.notionwidget.data.WidgetService.Companion.CONTENT
+import com.trusov.notionwidget.data.WidgetService.Companion.TEXT_SIZE
 import com.trusov.notionwidget.data.local.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
 import com.trusov.notionwidget.presentation.ConfigActivity
+import com.trusov.notionwidget.presentation.ConfigActivity.Companion.SMALL_TEXT_SIZE
 import com.trusov.notionwidget.presentation.MainActivity
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class NoteAppWidgetProvider : AppWidgetProvider() {
@@ -36,7 +34,7 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             notesDao.getNotes()
                 .observeOn(Schedulers.io())
                 .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe ({ notes ->
+                .subscribe({ notes ->
                     updateWidget(context, manager, id, notes[0].text)
                 }, {
                     Log.e("myLogs", it.message ?: "onError")
@@ -56,7 +54,7 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             notesDao.getNotes()
                 .observeOn(Schedulers.io())
                 .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe ({ notes ->
+                .subscribe({ notes ->
                     val text = when (intent?.action) {
                         ACTION_WIDGET_BACK -> getPreviousNote(notes, id)
                         ACTION_WIDGET_NEXT -> getNextNote(notes, id)
@@ -86,14 +84,17 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             val sp =
                 context?.getSharedPreferences(ConfigActivity.WIDGET_PREF, Context.MODE_PRIVATE)
             val color = sp?.getInt("${ConfigActivity.WIDGET_COLOR}-$appWidgetId", 0) ?: Color.DKGRAY
-            val textSize = sp?.getInt("${ConfigActivity.WIDGET_TEXT_SIZE}-$appWidgetId", 0) ?: 14
+            val textSize = sp?.getInt(
+                "${ConfigActivity.WIDGET_TEXT_SIZE}-$appWidgetId",
+                SMALL_TEXT_SIZE
+            ) ?: SMALL_TEXT_SIZE
 
             Log.d("myLogs", "updateWidget. color: $color, content: $content")
             val views = RemoteViews(context?.packageName, R.layout.widget_layout).apply {
-//                setFloat(R.id.tv_note_text, "setTextSize", textSize.toFloat())
                 setInt(R.id.widget_layout, "setBackgroundResource", getBackgroundDrawable(color))
                 setRemoteAdapter(R.id.lvTextView, Intent(context, WidgetService::class.java).apply {
                     putExtra(CONTENT, content)
+                    putExtra(TEXT_SIZE, textSize)
                     data = Uri.parse(this.toUri(Intent.URI_INTENT_SCHEME))
                 })
                 setOnClickPendingIntent(
