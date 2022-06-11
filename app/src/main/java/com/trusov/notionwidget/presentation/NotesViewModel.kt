@@ -45,6 +45,7 @@ class NotesViewModel @Inject constructor(
                                 .subscribe { blockDto ->
                                     val text = blockDto.results[0].paragraph.rich_text[0].plain_text
                                     notesDao.insertNote(NoteDbModel(text, 0))
+                                    Log.d(TAG, text)
                                 }
                        }
             }, {

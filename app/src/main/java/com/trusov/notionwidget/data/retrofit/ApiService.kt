@@ -3,23 +3,24 @@ package com.trusov.notionwidget.data.retrofit
 import com.trusov.notionwidget.data.dto.DbQueryDto
 import com.trusov.notionwidget.data.dto.block.BlockResponseDto
 import com.trusov.notionwidget.data.dto.db.DbDto
-import com.trusov.notionwidget.data.dto.filter.CreatedTime
-import com.trusov.notionwidget.data.dto.filter.Filter
-import com.trusov.notionwidget.data.dto.filter.FilterLastWeekDto
-import com.trusov.notionwidget.data.dto.filter.PastMonth
+import com.trusov.notionwidget.data.dto.filter.*
 import io.reactivex.rxjava3.core.Observable
-import retrofit2.Response
-import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Path
 
 interface ApiService {
 
     @POST("databases/{db}/query")
     fun getPageIds(
         @Path("db") dbId: String,
-        @Body filter: FilterLastWeekDto = FilterLastWeekDto(Filter(
-            timestamp = "created_time",
-            created_time = CreatedTime(PastMonth())
-        ))
+        @Body filter: FilterWrapperDto = FilterWrapperDto(
+            Filter(
+                multi_select = MultiSelect("Задачи"),
+                property = "Topic"
+            )
+        )
     ): Observable<DbQueryDto>
 
     @GET("blocks/{pageId}/children")
