@@ -3,17 +3,16 @@ package com.trusov.notionwidget.presentation
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.google.gson.JsonObject
 import com.trusov.notionwidget.R
-import com.trusov.notionwidget.data.local.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
 import com.trusov.notionwidget.data.retrofit.ApiService
 import com.trusov.notionwidget.domain.use_case.GetDatabaseUseCase
 import com.trusov.notionwidget.domain.use_case.GetPageBlocksUseCase
 import com.trusov.notionwidget.domain.use_case.GetPageIdsUseCase
 import io.reactivex.rxjava3.schedulers.Schedulers
-import okhttp3.ResponseBody
+import java.util.regex.Pattern
 import javax.inject.Inject
-import javax.security.auth.callback.Callback
 
 class NotesViewModel @Inject constructor(
     private val getPageIdsUseCase: GetPageIdsUseCase,
@@ -54,8 +53,19 @@ class NotesViewModel @Inject constructor(
             .observeOn(Schedulers.io())
             .subscribe({
                 if (it.isSuccessful) {
-                    val result = it.body().toString().length.toString()
-                    Log.d(TAG, result)
+                    val resultJson = it.body()?.asJsonObject
+                    val properties = resultJson?.getAsJsonObject("properties")
+                    val resultString = it.body().toString()
+                    parseProperties(resultString).forEach {
+                        val p = properties?.getAsJsonObject(it)
+                        val options = p?.getAsJsonObject("multi_select")?.getAsJsonArray("options")
+                        Log.d(TAG, "=== PROPERTY: $it ===")
+                        options?.forEach {
+                            val option = it as JsonObject
+                            Log.d(TAG, option.get("name").asString)
+                        }
+
+                    }
                 } else {
                     Log.d(TAG, "not successful: ${it.code()}")
                 }
@@ -64,4 +74,21 @@ class NotesViewModel @Inject constructor(
             })
     }
 
+    private fun parseProperties(body: String): List<String> {
+        val properties = mutableListOf<String>()
+        val pattern = Pattern.compile("$PROPERTY_START(\\w+)$PROPERTY_END")
+        val matcher = pattern.matcher(body)
+        while (matcher.find()) {
+            val property = matcher.group(1)?.toString()
+            property?.let { property ->
+                properties.add(property)
+            }
+        }
+        return properties
+    }
+
+    companion object {
+        private const val PROPERTY_START = "\"name\":\""
+        private const val PROPERTY_END = "\",\"type"
+    }
 }
