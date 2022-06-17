@@ -6,6 +6,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -33,7 +35,6 @@ class NotesFragment : Fragment() {
     }
 
     private var index = 0
-    private var size = 0
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -50,7 +51,7 @@ class NotesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.getContent()
+        viewModel.getProperties()
         viewModel.db
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -61,6 +62,23 @@ class NotesFragment : Fragment() {
                 Log.d("NotesFragmentTag", "onError: ${it.message}")
             })
 
+        viewModel.properties.observe(viewLifecycleOwner) {
+            val tags = it[1].options.map { it.name }
+            ArrayAdapter(
+                requireActivity(),
+                android.R.layout.simple_spinner_item,
+                tags
+            ).also { adapter ->
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                binding.spinnerTags.adapter = adapter
+            }
+        }
+
+        binding.buttonFilter.setOnClickListener {
+            val tag = binding.spinnerTags.selectedItem.toString()
+            Toast.makeText(requireContext(), tag, Toast.LENGTH_SHORT).show()
+            viewModel.getContent(tag)
+        }
     }
 
     private fun setupTexts(texts: List<String>) {
