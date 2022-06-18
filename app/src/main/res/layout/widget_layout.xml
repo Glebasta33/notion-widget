@@ -8,13 +8,13 @@
     <RelativeLayout
         android:id="@+id/widget_bar"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="@dimen/widget_bar_height"
         android:background="@drawable/widget_bar_background" />
 
     <ImageView
         android:id="@+id/iv_menu"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="@dimen/widget_ic"
+        android:layout_height="@dimen/widget_ic"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="10dp"
@@ -23,32 +23,32 @@
 
     <ImageView
         android:id="@+id/iv_settings"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="@dimen/widget_ic"
+        android:layout_height="@dimen/widget_ic"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/iv_menu"
-        android:layout_marginTop="10dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginTop="@dimen/ic_margin"
+        android:layout_marginStart="@dimen/ic_margin"
         android:background="@drawable/ic_settings" />
 
     <ImageView
         android:id="@+id/iv_back"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="@dimen/widget_ic"
+        android:layout_height="@dimen/widget_ic"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginTop="@dimen/ic_margin"
+        android:layout_marginEnd="@dimen/ic_margin"
         android:layout_toStartOf="@id/iv_forward"
         android:background="@drawable/ic_arrow_back" />
 
     <ImageView
         android:id="@+id/iv_forward"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="@dimen/widget_ic"
+        android:layout_height="@dimen/widget_ic"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
+        android:layout_marginTop="@dimen/ic_margin"
+        android:layout_marginEnd="@dimen/ic_margin"
         android:background="@drawable/ic_arrow_forward" />
 
         <ListView

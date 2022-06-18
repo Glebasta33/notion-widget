@@ -56,10 +56,12 @@ class NotesFragment : Fragment() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ models ->
-                val texts = models.map { it.text }
-                setupTexts(texts)
+                if (models.isNotEmpty()) {
+                    val texts = models.map { it.text }
+                    setupTexts(texts)
+                }
             }, {
-                Log.d("NotesFragmentTag", "onError: ${it.message}")
+                Toast.makeText(activity, "On Error: ${it.message}", Toast.LENGTH_SHORT).show()
             })
 
         viewModel.properties.observe(viewLifecycleOwner) {

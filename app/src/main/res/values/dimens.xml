@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="widget_corners_radius">10dp</dimen>
+    <dimen name="widget_ic">22dp</dimen>
+    <dimen name="widget_bar_height">40dp</dimen>
+    <dimen name="ic_margin">9dp</dimen>
 </resources>
