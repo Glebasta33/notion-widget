@@ -2,6 +2,7 @@ package com.trusov.notionwidget.di
 
 import android.app.Application
 import com.trusov.notionwidget.data.local.AppDatabase
+import com.trusov.notionwidget.data.local.FiltersDao
 import com.trusov.notionwidget.data.local.NotesDao
 import com.trusov.notionwidget.data.repository.RepositoryImpl
 import com.trusov.notionwidget.data.retrofit.ApiFactory
@@ -28,6 +29,12 @@ interface DataModule {
         @ApplicationScope
         fun provideNotesDao(application: Application): NotesDao {
             return AppDatabase.getInstance(application).notesDao()
+        }
+
+        @Provides
+        @ApplicationScope
+        fun provideFiltersDao(application: Application): FiltersDao {
+            return AppDatabase.getInstance(application).filtersDao()
         }
     }
 }

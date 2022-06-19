@@ -1,7 +1,7 @@
 package com.trusov.notionwidget.domain.entity
 
 data class FilterRule(
-    var property: Property,
-    var condition: Condition = Condition.CONTAINS,
-    var option: Option
+    val property: Property,
+    val condition: Condition = Condition.CONTAINS,
+    val option: Option
 )

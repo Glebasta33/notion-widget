@@ -78,9 +78,13 @@ class NotesFragment : Fragment() {
         }
 
         binding.buttonFilter.setOnClickListener {
-            val tag = binding.spinnerTags.selectedItem.toString()
-            Toast.makeText(requireContext(), tag, Toast.LENGTH_SHORT).show()
-            viewModel.loadContent(tag)
+            val option = binding.spinnerTags.selectedItem.toString()
+            viewModel.loadContent(option)
+        }
+
+        binding.buttonSaveFilter.setOnClickListener {
+            val option = binding.spinnerTags.selectedItem.toString()
+            viewModel.saveFilter(option)
         }
     }
 

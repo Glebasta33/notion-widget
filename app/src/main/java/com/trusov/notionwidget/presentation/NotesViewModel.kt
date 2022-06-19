@@ -7,16 +7,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.gson.JsonObject
 import com.trusov.notionwidget.R
-import com.trusov.notionwidget.data.dto.filter.FilterRuleDto
-import com.trusov.notionwidget.data.dto.filter.FilterDto
-import com.trusov.notionwidget.data.dto.filter.MultiSelectDto
 import com.trusov.notionwidget.data.local.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
 import com.trusov.notionwidget.data.retrofit.ApiService
 import com.trusov.notionwidget.domain.entity.*
+import com.trusov.notionwidget.domain.use_case.CreateFilterUseCase
 import com.trusov.notionwidget.domain.use_case.GetDatabaseUseCase
 import com.trusov.notionwidget.domain.use_case.GetPageBlocksUseCase
 import com.trusov.notionwidget.domain.use_case.LoadPageIdsUseCase
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.util.regex.Pattern
 import javax.inject.Inject
@@ -27,7 +26,8 @@ class NotesViewModel @Inject constructor(
     private val getDatabaseUseCase: GetDatabaseUseCase,
     private val application: Application,
     private val notesDao: NotesDao,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val createFilterUseCase: CreateFilterUseCase
 ) : ViewModel() {
 
     private val TAG = "NotesViewModelTag"
@@ -36,7 +36,33 @@ class NotesViewModel @Inject constructor(
     private val _properties = MutableLiveData<Map<Property, List<Option>>>()
     val properties: LiveData<Map<Property, List<Option>>> = _properties
 
-    fun loadContent(tag: String) {
+    fun saveFilter(option: String) {
+        Observable.fromCallable {
+            createFilterUseCase(
+                Filter(
+                    name = "Filter 1",
+                    rules = mutableListOf(
+                        FilterRule(
+                            property = Property(
+                                name = "Topic",
+                                type = Type.MULTI_SELECT
+                            ),
+                            condition = Condition.CONTAINS,
+                            option = Option(
+                                name = option,
+                                color = "red",
+                                isChecked = true
+                            )
+                        )
+                    )
+                )
+            )
+        }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
+    }
+
+    fun loadContent(option: String) {
         val ids = getPageIdsUseCase(
             application.resources.getString(R.string.zettel_db_id),
             Filter(
@@ -49,7 +75,7 @@ class NotesViewModel @Inject constructor(
                         ),
                         condition = Condition.CONTAINS,
                         option = Option(
-                            name = tag,
+                            name = option,
                             color = "red",
                             isChecked = true
                         )

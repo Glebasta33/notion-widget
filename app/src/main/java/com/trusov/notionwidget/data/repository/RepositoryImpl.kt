@@ -1,9 +1,11 @@
 package com.trusov.notionwidget.data.repository
 
+import android.util.Log
 import com.trusov.notionwidget.data.dto.DbQueryDto
 import com.trusov.notionwidget.data.dto.block.BlockResponseDto
 import com.trusov.notionwidget.data.dto.db.DbDto
 import com.trusov.notionwidget.data.dto.filter.FilterDto
+import com.trusov.notionwidget.data.local.FiltersDao
 import com.trusov.notionwidget.data.mapper.FilterMapper
 import com.trusov.notionwidget.data.retrofit.ApiService
 import com.trusov.notionwidget.domain.entity.Filter
@@ -13,7 +15,8 @@ import javax.inject.Inject
 
 class RepositoryImpl @Inject constructor(
     private val apiService: ApiService,
-    private val mapper: FilterMapper
+    private val mapper: FilterMapper,
+    private val filtersDao: FiltersDao
 ) : Repository {
 
     override fun loadPageIds(dbId: String, filter: Filter): Observable<DbQueryDto> {
@@ -30,7 +33,8 @@ class RepositoryImpl @Inject constructor(
     }
 
     override fun createFilter(filter: Filter) {
-        TODO("Not yet implemented")
+        val filterDbModel = mapper.mapEntityToDbModel(filter)
+        filtersDao.insert(filterDbModel)
     }
 
 }

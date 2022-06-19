@@ -4,12 +4,21 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.trusov.notionwidget.data.dto.filter.db_model.FilterDbModel
 import com.trusov.notionwidget.di.ApplicationScope
 
 @ApplicationScope
-@Database(entities = [NoteDbModel::class], version = 1, exportSchema = false)
+@Database(
+    entities = [
+        NoteDbModel::class,
+        FilterDbModel::class
+    ],
+    version = 3,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun notesDao(): NotesDao
+    abstract fun filtersDao(): FiltersDao
 
     companion object {
         private var db: AppDatabase? = null
