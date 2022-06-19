@@ -1,10 +1,9 @@
 package com.trusov.notionwidget.data.repository
 
-import android.util.Log
 import com.trusov.notionwidget.data.dto.DbQueryDto
 import com.trusov.notionwidget.data.dto.block.BlockResponseDto
 import com.trusov.notionwidget.data.dto.db.DbDto
-import com.trusov.notionwidget.data.dto.filter.FilterDto
+import com.trusov.notionwidget.data.dto.filter.db_model.FilterDbModel
 import com.trusov.notionwidget.data.local.FiltersDao
 import com.trusov.notionwidget.data.mapper.FilterMapper
 import com.trusov.notionwidget.data.retrofit.ApiService
@@ -35,6 +34,14 @@ class RepositoryImpl @Inject constructor(
     override fun createFilter(filter: Filter) {
         val filterDbModel = mapper.mapEntityToDbModel(filter)
         filtersDao.insert(filterDbModel)
+    }
+
+    override fun getFilters():  Observable<List<FilterDbModel>> {
+        return filtersDao.getFilters()
+    }
+
+    override fun getFilterByName(name: String): Observable<FilterDbModel> {
+        return filtersDao.findFilterByName(name)
     }
 
 }

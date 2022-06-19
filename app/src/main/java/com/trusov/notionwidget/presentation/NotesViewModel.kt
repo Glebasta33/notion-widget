@@ -9,12 +9,11 @@ import com.google.gson.JsonObject
 import com.trusov.notionwidget.R
 import com.trusov.notionwidget.data.local.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
+import com.trusov.notionwidget.data.mapper.FilterMapper
 import com.trusov.notionwidget.data.retrofit.ApiService
 import com.trusov.notionwidget.domain.entity.*
-import com.trusov.notionwidget.domain.use_case.CreateFilterUseCase
-import com.trusov.notionwidget.domain.use_case.GetDatabaseUseCase
-import com.trusov.notionwidget.domain.use_case.GetPageBlocksUseCase
-import com.trusov.notionwidget.domain.use_case.LoadPageIdsUseCase
+import com.trusov.notionwidget.domain.use_case.*
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.util.regex.Pattern
@@ -27,7 +26,10 @@ class NotesViewModel @Inject constructor(
     private val application: Application,
     private val notesDao: NotesDao,
     private val apiService: ApiService,
-    private val createFilterUseCase: CreateFilterUseCase
+    private val createFilterUseCase: CreateFilterUseCase,
+    private val getFiltersUseCase: GetFiltersUseCase,
+    private val getFilterByNameUseCase: GetFilterByNameUseCase,
+    private val mapper: FilterMapper
 ) : ViewModel() {
 
     private val TAG = "NotesViewModelTag"
@@ -35,6 +37,30 @@ class NotesViewModel @Inject constructor(
 
     private val _properties = MutableLiveData<Map<Property, List<Option>>>()
     val properties: LiveData<Map<Property, List<Option>>> = _properties
+
+    fun getFilters() {
+        getFiltersUseCase()
+            .subscribeOn(Schedulers.io())
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .subscribe ({
+                val filters = it.map { mapper.mapDbModelToEntity(it) }
+                Log.d(TAG, filters.toString())
+            }, {
+                Log.d(TAG, it.stackTraceToString())
+            })
+    }
+
+    fun getFilterByName(name: String) {
+        getFilterByNameUseCase(name)
+            .subscribeOn(Schedulers.io())
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .subscribe ({
+                val filter = mapper.mapDbModelToEntity(it)
+                Log.d(TAG, filter.toString())
+            }, {
+                Log.d(TAG, it.stackTraceToString())
+            })
+    }
 
     fun saveFilter(option: String) {
         Observable.fromCallable {

@@ -7,8 +7,7 @@ import com.trusov.notionwidget.data.dto.filter.db_model.FilterDbModel
 import com.trusov.notionwidget.data.dto.filter.db_model.FilterRuleDbModel
 import com.trusov.notionwidget.data.dto.filter.db_model.OptionDbModel
 import com.trusov.notionwidget.data.dto.filter.db_model.PropertyDbModel
-import com.trusov.notionwidget.domain.entity.Filter
-import com.trusov.notionwidget.domain.entity.FilterRule
+import com.trusov.notionwidget.domain.entity.*
 import javax.inject.Inject
 
 class FilterMapper @Inject constructor() {
@@ -16,7 +15,7 @@ class FilterMapper @Inject constructor() {
         val filterDto = FilterDto(
             filter = FilterRuleDto(
                 multi_select = MultiSelectDto(
-                   contains = entity.rules[0].option.name
+                    contains = entity.rules[0].option.name
                 ),
                 property = entity.rules[0].property.name
             )
@@ -34,6 +33,24 @@ class FilterMapper @Inject constructor() {
                 ),
                 condition = rule.condition.value,
                 option = OptionDbModel(
+                    name = rule.option.name,
+                    color = rule.option.color,
+                    isChecked = rule.option.isChecked
+                )
+            )
+        }
+    )
+
+    fun mapDbModelToEntity(dbModel: FilterDbModel) = Filter(
+        name = dbModel.name,
+        rules = dbModel.rules.map { rule ->
+            FilterRule(
+                property = Property(
+                    name = rule.property.name,
+                    type = Type.values().find { it.value == rule.property.type }!!
+                ),
+                condition = Condition.values().find { it.value == rule.condition }!!,
+                option = Option(
                     name = rule.option.name,
                     color = rule.option.color,
                     isChecked = rule.option.isChecked

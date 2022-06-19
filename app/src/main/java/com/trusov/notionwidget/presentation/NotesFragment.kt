@@ -86,6 +86,9 @@ class NotesFragment : Fragment() {
             val option = binding.spinnerTags.selectedItem.toString()
             viewModel.saveFilter(option)
         }
+
+        viewModel.getFilters()
+        viewModel.getFilterByName("Filter 1")
     }
 
     private fun setupTexts(texts: List<String>) {
