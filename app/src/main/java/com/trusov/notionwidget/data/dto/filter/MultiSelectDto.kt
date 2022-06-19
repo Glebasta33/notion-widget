@@ -1,5 +1,5 @@
 package com.trusov.notionwidget.data.dto.filter
 
-data class MultiSelect(
+data class MultiSelectDto(
     val contains: String
 )

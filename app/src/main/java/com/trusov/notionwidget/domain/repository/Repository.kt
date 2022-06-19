@@ -3,13 +3,15 @@ package com.trusov.notionwidget.domain.repository
 import com.trusov.notionwidget.data.dto.DbQueryDto
 import com.trusov.notionwidget.data.dto.block.BlockResponseDto
 import com.trusov.notionwidget.data.dto.db.DbDto
-import com.trusov.notionwidget.data.dto.filter.FilterWrapperDto
+import com.trusov.notionwidget.data.dto.filter.FilterDto
+import com.trusov.notionwidget.domain.entity.Filter
 import io.reactivex.rxjava3.core.Observable
-import retrofit2.Response
-import retrofit2.http.Path
 
 interface Repository {
-    fun getPageIds(dbId: String, filter: FilterWrapperDto): Observable<DbQueryDto>
-    fun getPageBlocks(pageId: String): Observable<BlockResponseDto>
-    fun getDatabase(dbId: String): Observable<DbDto>
+    fun loadPageIds(dbId: String, filter: Filter): Observable<DbQueryDto>
+    fun loadPageBlocks(pageId: String): Observable<BlockResponseDto>
+    fun loadDatabase(dbId: String): Observable<DbDto>
+    fun createFilter(filter: Filter)
+//    fun getFilters(): List<Filter>
+//    fun chooseFilter
 }

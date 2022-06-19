@@ -6,7 +6,6 @@ import com.trusov.notionwidget.data.dto.block.BlockResponseDto
 import com.trusov.notionwidget.data.dto.db.DbDto
 import com.trusov.notionwidget.data.dto.filter.*
 import io.reactivex.rxjava3.core.Observable
-import org.json.JSONObject
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -18,12 +17,7 @@ interface ApiService {
     @POST("databases/{db}/query")
     fun getPageIds(
         @Path("db") dbId: String,
-        @Body filter: FilterWrapperDto = FilterWrapperDto(
-            Filter(
-                multi_select = MultiSelect("Задачи"),
-                property = "Topic"
-            )
-        )
+        @Body filter: FilterDto
     ): Observable<DbQueryDto>
 
     @GET("blocks/{pageId}/children")

@@ -6,5 +6,5 @@ import javax.inject.Inject
 class GetDatabaseUseCase @Inject constructor(
     private val repository: Repository
 ) {
-    operator fun invoke(dbId: String) = repository.getDatabase(dbId)
+    operator fun invoke(dbId: String) = repository.loadDatabase(dbId)
 }

@@ -7,23 +7,22 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.gson.JsonObject
 import com.trusov.notionwidget.R
-import com.trusov.notionwidget.data.dto.filter.Filter
-import com.trusov.notionwidget.data.dto.filter.FilterWrapperDto
-import com.trusov.notionwidget.data.dto.filter.MultiSelect
+import com.trusov.notionwidget.data.dto.filter.FilterRuleDto
+import com.trusov.notionwidget.data.dto.filter.FilterDto
+import com.trusov.notionwidget.data.dto.filter.MultiSelectDto
 import com.trusov.notionwidget.data.local.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
 import com.trusov.notionwidget.data.retrofit.ApiService
-import com.trusov.notionwidget.domain.entity.Option
-import com.trusov.notionwidget.domain.entity.Property
+import com.trusov.notionwidget.domain.entity.*
 import com.trusov.notionwidget.domain.use_case.GetDatabaseUseCase
 import com.trusov.notionwidget.domain.use_case.GetPageBlocksUseCase
-import com.trusov.notionwidget.domain.use_case.GetPageIdsUseCase
+import com.trusov.notionwidget.domain.use_case.LoadPageIdsUseCase
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.util.regex.Pattern
 import javax.inject.Inject
 
 class NotesViewModel @Inject constructor(
-    private val getPageIdsUseCase: GetPageIdsUseCase,
+    private val getPageIdsUseCase: LoadPageIdsUseCase,
     private val getPageBlocksUseCase: GetPageBlocksUseCase,
     private val getDatabaseUseCase: GetDatabaseUseCase,
     private val application: Application,
@@ -34,16 +33,27 @@ class NotesViewModel @Inject constructor(
     private val TAG = "NotesViewModelTag"
     val db = notesDao.getNotes()
 
-    private val _properties = MutableLiveData<List<Property>>()
-    val properties: LiveData<List<Property>> = _properties
+    private val _properties = MutableLiveData<Map<Property, List<Option>>>()
+    val properties: LiveData<Map<Property, List<Option>>> = _properties
 
-    fun getContent(tag: String) {
+    fun loadContent(tag: String) {
         val ids = getPageIdsUseCase(
             application.resources.getString(R.string.zettel_db_id),
-            FilterWrapperDto(
-                Filter(
-                    multi_select = MultiSelect(tag),
-                    property = "Topic"
+            Filter(
+                name = "Filter 1",
+                rules = mutableListOf(
+                    FilterRule(
+                        property = Property(
+                            name = "Topic",
+                            type = Type.MULTI_SELECT
+                        ),
+                        condition = Condition.CONTAINS,
+                        option = Option(
+                            name = tag,
+                            color = "red",
+                            isChecked = true
+                        )
+                    )
                 )
             )
         )
@@ -68,7 +78,7 @@ class NotesViewModel @Inject constructor(
             })
     }
 
-    fun getProperties() {
+    fun loadDbProperties() {
         apiService.getDatabaseJson(application.resources.getString(R.string.zettel_db_id))
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
@@ -77,27 +87,25 @@ class NotesViewModel @Inject constructor(
                     val dbAsString = it.body().toString()
                     val dbAsJson = it.body()?.asJsonObject
                     val propertiesJson = dbAsJson?.getAsJsonObject("properties")
-                    val listOfProperties = mutableListOf<Property>()
+                    val map = mutableMapOf<Property, List<Option>>()
                     parsePropertyNames(dbAsString).forEach { propertyName ->
                         val p = propertiesJson?.getAsJsonObject(propertyName)
                         val optionsJson =
                             p?.getAsJsonObject("multi_select")?.getAsJsonArray("options")
-                        val optionNames = mutableListOf<Option>()
+                        val options = mutableListOf<Option>()
                         optionsJson?.forEach {
                             val optionJson = it as JsonObject
                             val option = Option(
                                 name = optionJson.get("name").asString,
                                 color = optionJson.get("color").asString
                             )
-                            optionNames.add(option)
+                            options.add(option)
                         }
-                        val property = Property(
-                            name = propertyName,
-                            options = optionNames
-                        )
-                        listOfProperties.add(property)
+                        val property = Property(name = propertyName)
+                        map.put(property, options)
                     }
-                    _properties.postValue(listOfProperties)
+                    _properties.postValue(map)
+                    Log.d(TAG, map.toString())
                 } else {
                     Log.d(TAG, "not successful: ${it.code()}")
                 }
