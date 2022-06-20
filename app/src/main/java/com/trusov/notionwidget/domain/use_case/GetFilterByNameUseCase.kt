@@ -6,5 +6,5 @@ import javax.inject.Inject
 class GetFilterByNameUseCase @Inject constructor(
     private val repository: Repository
 ) {
-    operator fun invoke(name: String) = repository.getFilterByName(name)
+    operator fun invoke(name: String) = repository.getFilterWithNotesByName(name)
 }

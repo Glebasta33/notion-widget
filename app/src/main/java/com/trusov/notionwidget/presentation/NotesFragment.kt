@@ -88,7 +88,7 @@ class NotesFragment : Fragment() {
         }
 
         viewModel.getFilters()
-        viewModel.getFilterByName("Filter 1")
+        viewModel.getFilterByName("Filter 2")
     }
 
     private fun setupTexts(texts: List<String>) {

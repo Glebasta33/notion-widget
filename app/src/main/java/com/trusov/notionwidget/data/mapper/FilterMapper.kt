@@ -3,11 +3,9 @@ package com.trusov.notionwidget.data.mapper
 import com.trusov.notionwidget.data.dto.filter.FilterDto
 import com.trusov.notionwidget.data.dto.filter.FilterRuleDto
 import com.trusov.notionwidget.data.dto.filter.MultiSelectDto
-import com.trusov.notionwidget.data.dto.filter.db_model.FilterDbModel
-import com.trusov.notionwidget.data.dto.filter.db_model.FilterRuleDbModel
-import com.trusov.notionwidget.data.dto.filter.db_model.OptionDbModel
-import com.trusov.notionwidget.data.dto.filter.db_model.PropertyDbModel
+import com.trusov.notionwidget.data.dto.filter.db_model.*
 import com.trusov.notionwidget.domain.entity.*
+import com.trusov.notionwidget.domain.entity.note.Note
 import javax.inject.Inject
 
 class FilterMapper @Inject constructor() {
@@ -41,9 +39,9 @@ class FilterMapper @Inject constructor() {
         }
     )
 
-    fun mapDbModelToEntity(dbModel: FilterDbModel) = Filter(
-        name = dbModel.name,
-        rules = dbModel.rules.map { rule ->
+    fun mapFilterWithNotesToEntity(dbModel: FilterWithNotes, notes: List<Note>) = Filter(
+        name = dbModel.filter.name,
+        rules = dbModel.filter.rules.map { rule ->
             FilterRule(
                 property = Property(
                     name = rule.property.name,
@@ -56,7 +54,8 @@ class FilterMapper @Inject constructor() {
                     isChecked = rule.option.isChecked
                 )
             )
-        }
+        },
+        notes = notes
     )
 
 }

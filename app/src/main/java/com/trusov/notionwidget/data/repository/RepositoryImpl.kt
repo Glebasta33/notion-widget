@@ -6,6 +6,7 @@ import com.trusov.notionwidget.data.dto.db.DbDto
 import com.trusov.notionwidget.data.dto.filter.db_model.FilterDbModel
 import com.trusov.notionwidget.data.local.FiltersDao
 import com.trusov.notionwidget.data.mapper.FilterMapper
+import com.trusov.notionwidget.data.mapper.NoteMapper
 import com.trusov.notionwidget.data.retrofit.ApiService
 import com.trusov.notionwidget.domain.entity.Filter
 import com.trusov.notionwidget.domain.repository.Repository
@@ -14,12 +15,13 @@ import javax.inject.Inject
 
 class RepositoryImpl @Inject constructor(
     private val apiService: ApiService,
-    private val mapper: FilterMapper,
+    private val filterMapper: FilterMapper,
+    private val noteMapper: NoteMapper,
     private val filtersDao: FiltersDao
 ) : Repository {
 
     override fun loadPageIds(dbId: String, filter: Filter): Observable<DbQueryDto> {
-        val filterDto = mapper.mapEntityToDto(filter)
+        val filterDto = filterMapper.mapEntityToDto(filter)
         return apiService.getPageIds(dbId, filterDto)
     }
 
@@ -32,16 +34,19 @@ class RepositoryImpl @Inject constructor(
     }
 
     override fun createFilter(filter: Filter) {
-        val filterDbModel = mapper.mapEntityToDbModel(filter)
+        val filterDbModel = filterMapper.mapEntityToDbModel(filter)
         filtersDao.insert(filterDbModel)
     }
 
-    override fun getFilters():  Observable<List<FilterDbModel>> {
+    override fun getFilters(): Observable<List<FilterDbModel>> {
         return filtersDao.getFilters()
     }
 
-    override fun getFilterByName(name: String): Observable<FilterDbModel> {
-        return filtersDao.findFilterByName(name)
+    override fun getFilterWithNotesByName(name: String): Observable<Filter> {
+        return filtersDao.findFilterWithNotesByName(name).map {
+            val notes = it.notes.map { noteMapper.mapDbModelToEntity(it) }
+            filterMapper.mapFilterWithNotesToEntity(it, notes)
+        }
     }
 
 }

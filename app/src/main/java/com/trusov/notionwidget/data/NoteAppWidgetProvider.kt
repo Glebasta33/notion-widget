@@ -13,7 +13,7 @@ import com.trusov.notionwidget.App
 import com.trusov.notionwidget.R
 import com.trusov.notionwidget.data.WidgetService.Companion.CONTENT
 import com.trusov.notionwidget.data.WidgetService.Companion.TEXT_SIZE
-import com.trusov.notionwidget.data.local.NoteDbModel
+import com.trusov.notionwidget.data.dto.note.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
 import com.trusov.notionwidget.presentation.ConfigActivity
 import com.trusov.notionwidget.presentation.ConfigActivity.Companion.SMALL_TEXT_SIZE

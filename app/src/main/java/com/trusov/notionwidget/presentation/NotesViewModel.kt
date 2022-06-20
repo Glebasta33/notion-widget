@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.gson.JsonObject
 import com.trusov.notionwidget.R
-import com.trusov.notionwidget.data.local.NoteDbModel
+import com.trusov.notionwidget.data.dto.note.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
 import com.trusov.notionwidget.data.mapper.FilterMapper
 import com.trusov.notionwidget.data.retrofit.ApiService
@@ -43,8 +43,7 @@ class NotesViewModel @Inject constructor(
             .subscribeOn(Schedulers.io())
             .subscribeOn(AndroidSchedulers.mainThread())
             .subscribe ({
-                val filters = it.map { mapper.mapDbModelToEntity(it) }
-                Log.d(TAG, filters.toString())
+                Log.d(TAG, it.toString())
             }, {
                 Log.d(TAG, it.stackTraceToString())
             })
@@ -55,8 +54,7 @@ class NotesViewModel @Inject constructor(
             .subscribeOn(Schedulers.io())
             .subscribeOn(AndroidSchedulers.mainThread())
             .subscribe ({
-                val filter = mapper.mapDbModelToEntity(it)
-                Log.d(TAG, filter.toString())
+                Log.d(TAG, "getFilterByName: \nname: ${it.name} \nnotes: ${it.notes}")
             }, {
                 Log.d(TAG, it.stackTraceToString())
             })
@@ -112,14 +110,14 @@ class NotesViewModel @Inject constructor(
         ids.subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .subscribe({
-                notesDao.clear()
+                // notesDao.clear()
                 it.results.forEach { idDto ->
                     getPageBlocksUseCase(idDto.id)
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
                         .subscribe { blockDto ->
                             val text = blockDto.results[0].paragraph.rich_text[0].plain_text
-                            notesDao.insertNote(NoteDbModel(text, 0))
+                            notesDao.insertNote(NoteDbModel(text, 0, "Filter 1"))
                             Log.d(TAG, text)
                         }
                 }

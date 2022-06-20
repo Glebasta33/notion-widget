@@ -1,4 +1,4 @@
-package com.trusov.notionwidget.data.local
+package com.trusov.notionwidget.data.dto.note
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -7,5 +7,6 @@ import androidx.room.PrimaryKey
 data class NoteDbModel(
     val text: String,
     @PrimaryKey(autoGenerate = true)
-    val id: Int
+    val id: Int,
+    val filterName: String
 )
