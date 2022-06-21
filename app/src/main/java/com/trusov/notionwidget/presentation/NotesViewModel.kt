@@ -9,7 +9,6 @@ import com.google.gson.JsonObject
 import com.trusov.notionwidget.R
 import com.trusov.notionwidget.data.dto.note.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
-import com.trusov.notionwidget.data.mapper.FilterMapper
 import com.trusov.notionwidget.data.retrofit.ApiService
 import com.trusov.notionwidget.domain.entity.*
 import com.trusov.notionwidget.domain.use_case.*
@@ -28,8 +27,7 @@ class NotesViewModel @Inject constructor(
     private val apiService: ApiService,
     private val createFilterUseCase: CreateFilterUseCase,
     private val getFiltersUseCase: GetFiltersUseCase,
-    private val getFilterByNameUseCase: GetFilterByNameUseCase,
-    private val mapper: FilterMapper
+    private val getFilterByNameUseCase: GetFilterByNameUseCase
 ) : ViewModel() {
 
     private val TAG = "NotesViewModelTag"
@@ -38,11 +36,14 @@ class NotesViewModel @Inject constructor(
     private val _properties = MutableLiveData<Map<Property, List<Option>>>()
     val properties: LiveData<Map<Property, List<Option>>> = _properties
 
+    private val _texts = MutableLiveData<List<String>>()
+    val texts: LiveData<List<String>> = _texts
+
     fun getFilters() {
         getFiltersUseCase()
             .subscribeOn(Schedulers.io())
             .subscribeOn(AndroidSchedulers.mainThread())
-            .subscribe ({
+            .subscribe({
                 Log.d(TAG, it.toString())
             }, {
                 Log.d(TAG, it.stackTraceToString())
@@ -53,7 +54,7 @@ class NotesViewModel @Inject constructor(
         getFilterByNameUseCase(name)
             .subscribeOn(Schedulers.io())
             .subscribeOn(AndroidSchedulers.mainThread())
-            .subscribe ({
+            .subscribe({
                 Log.d(TAG, "getFilterByName: \nname: ${it.name} \nnotes: ${it.notes}")
             }, {
                 Log.d(TAG, it.stackTraceToString())
@@ -86,31 +87,34 @@ class NotesViewModel @Inject constructor(
             .subscribe()
     }
 
-    fun loadContent(option: String) {
-        val ids = getPageIdsUseCase(
-            application.resources.getString(R.string.zettel_db_id),
-            Filter(
-                name = "Filter 1",
-                rules = mutableListOf(
-                    FilterRule(
-                        property = Property(
-                            name = "Topic",
-                            type = Type.MULTI_SELECT
-                        ),
-                        condition = Condition.CONTAINS,
-                        option = Option(
-                            name = option,
-                            color = "red",
-                            isChecked = true
-                        )
-                    )
-                )
-            )
-        )
-        ids.subscribeOn(Schedulers.io())
+    fun getNotes(option: String) {
+        val texts = mutableListOf<String>()
+        loadNotesIds(option)
+            .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .subscribe({
-                // notesDao.clear()
+                it.results.forEach { idDto ->
+                    getPageBlocksUseCase(idDto.id)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(Schedulers.io())
+                        .subscribe ({ blockDto ->
+                            val text = blockDto.results[0].paragraph.rich_text[0].plain_text
+                            texts.add(text)
+                            Log.d(TAG, "text: $text")
+                        }, {}, {
+                            _texts.postValue(texts)
+                        })
+                }
+            }, {
+                Log.d(TAG, "onError: ${it.message}")
+            })
+    }
+
+    fun saveNotes(option: String) {
+        val noteIds = loadNotesIds(option)
+        noteIds.subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
+            .subscribe({
                 it.results.forEach { idDto ->
                     getPageBlocksUseCase(idDto.id)
                         .subscribeOn(Schedulers.io())
@@ -128,7 +132,31 @@ class NotesViewModel @Inject constructor(
             })
     }
 
+    private fun loadNotesIds(option: String) = getPageIdsUseCase(
+        application.resources.getString(R.string.zettel_db_id),
+        Filter(
+            rules = mutableListOf(
+                FilterRule(
+                    property = Property(
+                        name = "Topic",
+                        type = Type.MULTI_SELECT
+                    ),
+                    condition = Condition.CONTAINS,
+                    option = Option(
+                        name = option,
+                        color = "red",
+                        isChecked = true
+                    )
+                )
+            )
+        )
+    )
+
+    // private fun buildFilter(propertyName, propertyType: Type, condition: Condition, optionName: String, color: Color, ...): Filter {  }
+
     fun loadDbProperties() {
+        // TODO: перенести в логику в getDatabaseUseCase,
+        //  реализовать сохранение в таблцу options(?)(id, option_name, option_type, color, property).
         apiService.getDatabaseJson(application.resources.getString(R.string.zettel_db_id))
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())

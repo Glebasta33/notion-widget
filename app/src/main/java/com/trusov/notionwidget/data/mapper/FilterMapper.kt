@@ -22,7 +22,7 @@ class FilterMapper @Inject constructor() {
     }
 
     fun mapEntityToDbModel(entity: Filter) = FilterDbModel(
-        name = entity.name,
+        name = entity.name ?: "",
         rules = entity.rules.map { rule ->
             FilterRuleDbModel(
                 property = PropertyDbModel(

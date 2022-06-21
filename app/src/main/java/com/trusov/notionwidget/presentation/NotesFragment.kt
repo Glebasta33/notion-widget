@@ -2,6 +2,7 @@ package com.trusov.notionwidget.presentation
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,9 +11,11 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.trusov.notionwidget.App
+import com.trusov.notionwidget.data.dto.note.NoteDbModel
 import com.trusov.notionwidget.databinding.NotesFragmentBinding
 import com.trusov.notionwidget.di.ViewModelFactory
 import com.trusov.notionwidget.domain.entity.Property
+import com.trusov.notionwidget.domain.use_case.GetPageBlocksUseCase
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import javax.inject.Inject
@@ -32,6 +35,10 @@ class NotesFragment : Fragment() {
         )[NotesViewModel::class.java]
     }
 
+    // TODO: remove after testing:
+    @Inject
+    lateinit var getPageBlocksUseCase: GetPageBlocksUseCase
+
     private var index = 0
 
     override fun onAttach(context: Context) {
@@ -50,6 +57,8 @@ class NotesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.loadDbProperties()
+
+/*        Fetching all notes from room:
         viewModel.db
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -59,8 +68,8 @@ class NotesFragment : Fragment() {
                     setupTexts(texts)
                 }
             }, {
-                Toast.makeText(activity, "On Error: ${it.message}", Toast.LENGTH_SHORT).show()
-            })
+                Toast.makeText(activity, "OnError: ${it.message}", Toast.LENGTH_SHORT).show()
+            })*/
 
         viewModel.properties.observe(viewLifecycleOwner) {
             val options = it[Property("Topic")]?.map { p -> p.name }
@@ -74,21 +83,28 @@ class NotesFragment : Fragment() {
                     binding.spinnerTags.adapter = adapter
                 }
             }
+        }
 
+        // TODO: Создать sealed class State
+
+        viewModel.texts.observe(viewLifecycleOwner) {
+            setupTexts(it)
         }
 
         binding.buttonFilter.setOnClickListener {
             val option = binding.spinnerTags.selectedItem.toString()
-            viewModel.loadContent(option)
+            viewModel.getNotes(option)
         }
 
         binding.buttonSaveFilter.setOnClickListener {
             val option = binding.spinnerTags.selectedItem.toString()
             viewModel.saveFilter(option)
+            viewModel.saveNotes(option)
         }
 
-        viewModel.getFilters()
-        viewModel.getFilterByName("Filter 2")
+//        viewModel.getFilters()
+//        viewModel.getFilterByName("Filter 2")
+
     }
 
     private fun setupTexts(texts: List<String>) {
@@ -102,6 +118,10 @@ class NotesFragment : Fragment() {
                 binding.tvText.text = texts[0]
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "NotesFragmentTag"
     }
 
 }

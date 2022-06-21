@@ -1,6 +1,6 @@
 package com.trusov.notionwidget.data.repository
 
-import com.trusov.notionwidget.data.dto.DbQueryDto
+import com.trusov.notionwidget.data.dto.NoteIdsDto
 import com.trusov.notionwidget.data.dto.block.BlockResponseDto
 import com.trusov.notionwidget.data.dto.db.DbDto
 import com.trusov.notionwidget.data.dto.filter.db_model.FilterDbModel
@@ -20,7 +20,7 @@ class RepositoryImpl @Inject constructor(
     private val filtersDao: FiltersDao
 ) : Repository {
 
-    override fun loadPageIds(dbId: String, filter: Filter): Observable<DbQueryDto> {
+    override fun loadPageIds(dbId: String, filter: Filter): Observable<NoteIdsDto> {
         val filterDto = filterMapper.mapEntityToDto(filter)
         return apiService.getPageIds(dbId, filterDto)
     }

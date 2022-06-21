@@ -1,7 +1,7 @@
 package com.trusov.notionwidget.data.retrofit
 
 import com.google.gson.JsonElement
-import com.trusov.notionwidget.data.dto.DbQueryDto
+import com.trusov.notionwidget.data.dto.NoteIdsDto
 import com.trusov.notionwidget.data.dto.block.BlockResponseDto
 import com.trusov.notionwidget.data.dto.db.DbDto
 import com.trusov.notionwidget.data.dto.filter.*
@@ -18,7 +18,7 @@ interface ApiService {
     fun getPageIds(
         @Path("db") dbId: String,
         @Body filter: FilterDto
-    ): Observable<DbQueryDto>
+    ): Observable<NoteIdsDto>
 
     @GET("blocks/{pageId}/children")
     fun getPageBlocks(
