@@ -64,32 +64,6 @@ class NotesViewModel @Inject constructor(
             })
     }
 
-    fun saveFilter(option: String) {
-        Observable.fromCallable {
-            createFilterUseCase(
-                Filter(
-                    name = "Filter 1",
-                    rules = mutableListOf(
-                        FilterRule(
-                            property = Property(
-                                name = "Topic",
-                                type = Type.MULTI_SELECT
-                            ),
-                            condition = Condition.CONTAINS,
-                            option = Option(
-                                name = option,
-                                color = "red",
-                                isChecked = true
-                            )
-                        )
-                    )
-                )
-            )
-        }
-            .subscribeOn(Schedulers.io())
-            .subscribe()
-    }
-
     fun getNotes(option: String) {
         val texts = mutableListOf<String>()
         loadNotesIds(option)
@@ -114,7 +88,42 @@ class NotesViewModel @Inject constructor(
             })
     }
 
-    fun saveNotes(option: String) {
+    fun saveFilter(option: String, filterName: String?) {
+        if (filterName.isNullOrEmpty()) {
+            _state.postValue(Error("Input some name"))
+            return
+        }
+        Observable.fromCallable {
+            createFilterUseCase(
+                Filter(
+                    name = filterName,
+                    rules = mutableListOf(
+                        FilterRule(
+                            property = Property(
+                                name = "Topic",
+                                type = Type.MULTI_SELECT
+                            ),
+                            condition = Condition.CONTAINS,
+                            option = Option(
+                                name = option,
+                                color = "red",
+                                isChecked = true
+                            )
+                        )
+                    )
+                )
+            )
+        }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
+    }
+
+    fun saveNotes(option: String, filterName: String?) {
+        if (filterName.isNullOrEmpty()) {
+            _state.postValue(Error("Input some name"))
+            return
+        }
+        // TODO: Реализовать вставку из уже загруженного значения NotesResult
         val noteIds = loadNotesIds(option)
         noteIds.subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
@@ -125,7 +134,7 @@ class NotesViewModel @Inject constructor(
                         .observeOn(Schedulers.io())
                         .subscribe { blockDto ->
                             val text = blockDto.results[0].paragraph.rich_text[0].plain_text
-                            notesDao.insertNote(NoteDbModel(text, 0, "Filter 1"))
+                            notesDao.insertNote(NoteDbModel(text, 0, filterName))
                             Log.d(TAG, text)
                         }
                 }

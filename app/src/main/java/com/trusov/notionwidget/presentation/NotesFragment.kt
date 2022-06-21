@@ -107,8 +107,13 @@ class NotesFragment : Fragment() {
 
         binding.buttonSaveFilter.setOnClickListener {
             val option = binding.spinnerTags.selectedItem.toString()
-            viewModel.saveFilter(option)
-            viewModel.saveNotes(option)
+            val filterName = binding.etFilterName.text.toString()
+            viewModel.saveFilter(option, filterName)
+            viewModel.saveNotes(option, filterName)
+            binding.etFilterName.text.clear()
+            if (filterName.isNotEmpty()) {
+                Toast.makeText(activity, "Filter \"$filterName\" saved", Toast.LENGTH_SHORT).show()
+            }
         }
 
 //        viewModel.getFilters()
