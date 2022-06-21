@@ -33,11 +33,14 @@ class NotesViewModel @Inject constructor(
     private val TAG = "NotesViewModelTag"
     val db = notesDao.getNotes()
 
-    private val _properties = MutableLiveData<Map<Property, List<Option>>>()
-    val properties: LiveData<Map<Property, List<Option>>> = _properties
+//    private val _properties = MutableLiveData<Map<Property, List<Option>>>()
+//    val properties: LiveData<Map<Property, List<Option>>> = _properties
+//
+//    private val _texts = MutableLiveData<List<String>>()
+//    val texts: LiveData<List<String>> = _texts
 
-    private val _texts = MutableLiveData<List<String>>()
-    val texts: LiveData<List<String>> = _texts
+    private val _state = MutableLiveData<State>()
+    val state: LiveData<State> = _state
 
     fun getFilters() {
         getFiltersUseCase()
@@ -93,6 +96,7 @@ class NotesViewModel @Inject constructor(
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .subscribe({
+                _state.postValue(Loading)
                 it.results.forEach { idDto ->
                     getPageBlocksUseCase(idDto.id)
                         .subscribeOn(Schedulers.io())
@@ -102,7 +106,7 @@ class NotesViewModel @Inject constructor(
                             texts.add(text)
                             Log.d(TAG, "text: $text")
                         }, {}, {
-                            _texts.postValue(texts)
+                            _state.postValue(NotesResult(texts))
                         })
                 }
             }, {
@@ -182,7 +186,7 @@ class NotesViewModel @Inject constructor(
                         val property = Property(name = propertyName)
                         map.put(property, options)
                     }
-                    _properties.postValue(map)
+                    _state.postValue(PropertiesResult(map))
                     Log.d(TAG, map.toString())
                 } else {
                     Log.d(TAG, "not successful: ${it.code()}")

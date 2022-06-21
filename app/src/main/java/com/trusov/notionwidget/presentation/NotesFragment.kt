@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.trusov.notionwidget.App
@@ -71,24 +72,32 @@ class NotesFragment : Fragment() {
                 Toast.makeText(activity, "OnError: ${it.message}", Toast.LENGTH_SHORT).show()
             })*/
 
-        viewModel.properties.observe(viewLifecycleOwner) {
-            val options = it[Property("Topic")]?.map { p -> p.name }
-            options?.let {
-                ArrayAdapter(
-                    requireActivity(),
-                    android.R.layout.simple_spinner_item,
-                    options
-                ).also { adapter ->
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    binding.spinnerTags.adapter = adapter
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            binding.progressBar.isGone = true
+            when(state) {
+                is NotesResult -> {
+                    setupTexts(state.value)
+                }
+                is PropertiesResult -> {
+                    val options = state.value[Property("Topic")]?.map { p -> p.name }
+                    options?.let {
+                        ArrayAdapter(
+                            requireActivity(),
+                            android.R.layout.simple_spinner_item,
+                            options
+                        ).also { adapter ->
+                            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                            binding.spinnerTags.adapter = adapter
+                        }
+                    }
+                }
+                is Error -> {
+                    Toast.makeText(activity, state.value, Toast.LENGTH_SHORT).show()
+                }
+                is Loading -> {
+                    binding.progressBar.isGone = false
                 }
             }
-        }
-
-        // TODO: Создать sealed class State
-
-        viewModel.texts.observe(viewLifecycleOwner) {
-            setupTexts(it)
         }
 
         binding.buttonFilter.setOnClickListener {
