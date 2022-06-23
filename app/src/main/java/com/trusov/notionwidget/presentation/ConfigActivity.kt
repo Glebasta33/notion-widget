@@ -4,12 +4,21 @@ import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
+import com.trusov.notionwidget.App
 import com.trusov.notionwidget.R
 import com.trusov.notionwidget.data.NoteAppWidgetProvider
 import com.trusov.notionwidget.databinding.ActivityConfigBinding
+import com.trusov.notionwidget.domain.use_case.GetFiltersUseCase
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.schedulers.Schedulers
+import javax.inject.Inject
 
 class ConfigActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var getFiltersUseCase: GetFiltersUseCase
 
     private val binding by lazy {
         ActivityConfigBinding.inflate(layoutInflater)
@@ -17,13 +26,14 @@ class ConfigActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        (application as App).component.inject(this)
         intent.extras?.let { extras ->
             widgetId = extras.getInt(
                 AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID
             )
         }
+
         if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             finish()
         }
@@ -44,6 +54,8 @@ class ConfigActivity : AppCompatActivity() {
         if (sp.contains("$CHECKED_TEXT_SIZE_BTN-$widgetId")) {
             binding.rgTextSizes.check(sp.getInt("$CHECKED_TEXT_SIZE_BTN-$widgetId", 0))
         }
+
+        setupSpinner()
 
         binding.rgColor.setOnCheckedChangeListener { radioGroup, id -> setSelectedColor(id) }
 
@@ -83,6 +95,23 @@ class ConfigActivity : AppCompatActivity() {
             else -> SMALL_TEXT_SIZE
         }
     }
+
+    private fun setupSpinner() {
+        getFiltersUseCase()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                ArrayAdapter(
+                    this,
+                    android.R.layout.simple_spinner_item,
+                    it.map { it.name }
+                ).also { adapter ->
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    binding.spinnerFilters.adapter = adapter
+                }
+            }
+    }
+
 
     companion object {
         const val LOG_TAG = "myLogs"
