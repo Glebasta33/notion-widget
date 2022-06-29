@@ -14,7 +14,7 @@ import com.trusov.notionwidget.di.ApplicationScope
         NoteDbModel::class,
         FilterDbModel::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

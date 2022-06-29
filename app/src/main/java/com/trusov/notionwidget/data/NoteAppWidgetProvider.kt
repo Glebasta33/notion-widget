@@ -15,6 +15,8 @@ import com.trusov.notionwidget.data.WidgetService.Companion.CONTENT
 import com.trusov.notionwidget.data.WidgetService.Companion.TEXT_SIZE
 import com.trusov.notionwidget.data.dto.note.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
+import com.trusov.notionwidget.domain.entity.note.Note
+import com.trusov.notionwidget.domain.use_case.GetFilterWithNotesByNameUseCase
 import com.trusov.notionwidget.presentation.ConfigActivity
 import com.trusov.notionwidget.presentation.ConfigActivity.Companion.SMALL_TEXT_SIZE
 import com.trusov.notionwidget.presentation.MainActivity
@@ -25,20 +27,30 @@ import javax.inject.Inject
 class NoteAppWidgetProvider : AppWidgetProvider() {
 
     @Inject
-    lateinit var notesDao: NotesDao
+    lateinit var getFilterWithNotesByNameUseCase: GetFilterWithNotesByNameUseCase
 
     override fun onUpdate(context: Context?, manager: AppWidgetManager?, ids: IntArray?) {
         super.onUpdate(context, manager, ids)
         ids?.forEach { id ->
             (context?.applicationContext as App).component.inject(this)
-            notesDao.getNotes()
-                .observeOn(Schedulers.io())
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe({ notes ->
-                    updateWidget(context, manager, id, notes[0].text)
-                }, {
-                    Log.e("myLogs", it.message ?: "onError")
-                })
+
+            val sp =
+                context.getSharedPreferences(ConfigActivity.WIDGET_PREF, Context.MODE_PRIVATE)
+            val filterName = sp?.getString("${ConfigActivity.WIDGET_FILTER}-$id", null)
+            filterName?.let {
+                getFilterWithNotesByNameUseCase(filterName)
+                    .observeOn(Schedulers.io())
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe({
+                        it.notes?.let { notes ->
+                            updateWidget(context, manager, id, notes[0].text)
+                        }
+
+                    }, {
+                        Log.e("myLogs", it.message ?: "onError")
+                    })
+            }
+
 
         }
     }
@@ -46,22 +58,33 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
     override fun onReceive(context: Context?, intent: Intent?) {
         (context?.applicationContext as App).component.inject(this)
         super.onReceive(context, intent)
+
         val id = intent?.extras?.getInt(
             AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID
         ) ?: 0
-        if (id != AppWidgetManager.INVALID_APPWIDGET_ID) {
-            notesDao.getNotes()
+
+        val sp =
+            context.getSharedPreferences(ConfigActivity.WIDGET_PREF, Context.MODE_PRIVATE)
+        val filterName = sp.getString("${ConfigActivity.WIDGET_FILTER}-$id", null)
+
+        Log.e("myLogs", "filterName: $filterName")
+
+        if (id != AppWidgetManager.INVALID_APPWIDGET_ID && filterName != null) {
+            getFilterWithNotesByNameUseCase(filterName)
                 .observeOn(Schedulers.io())
                 .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe({ notes ->
-                    val text = when (intent?.action) {
-                        ACTION_WIDGET_BACK -> getPreviousNote(notes, id)
-                        ACTION_WIDGET_NEXT -> getNextNote(notes, id)
-                        else -> notes[indexes["$INDEX_KEY-$id"] ?: 0].text
+                .subscribe({ filter ->
+                    filter.notes?.let { notes ->
+                        val text = when (intent?.action) {
+                            ACTION_WIDGET_BACK -> getPreviousNote(notes, id)
+                            ACTION_WIDGET_NEXT -> getNextNote(notes, id)
+                            else -> notes[indexes["$INDEX_KEY-$id"] ?: 0].text
+                        }
+                        val manager = AppWidgetManager.getInstance(context)
+                        updateWidget(context, manager, id, text)
+
                     }
-                    val manager = AppWidgetManager.getInstance(context)
-                    updateWidget(context, manager, id, text)
                 }, {
                     Log.e("myLogs", it.message ?: "onError")
                 })
@@ -154,7 +177,7 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             }
         }
 
-        private fun getPreviousNote(notes: List<NoteDbModel>, id: Int): String {
+        private fun getPreviousNote(notes: List<Note>, id: Int): String {
             if (!indexes.containsKey("$INDEX_KEY-$id")) {
                 indexes["$INDEX_KEY-$id"] = 0
             }
@@ -169,7 +192,7 @@ class NoteAppWidgetProvider : AppWidgetProvider() {
             return notes[index].text
         }
 
-        private fun getNextNote(notes: List<NoteDbModel>, id: Int): String {
+        private fun getNextNote(notes: List<Note>, id: Int): String {
             if (!indexes.containsKey("$INDEX_KEY-$id")) {
                 indexes["$INDEX_KEY-$id"] = 0
             }

@@ -27,7 +27,7 @@ class NotesViewModel @Inject constructor(
     private val apiService: ApiService,
     private val createFilterUseCase: CreateFilterUseCase,
     private val getFiltersUseCase: GetFiltersUseCase,
-    private val getFilterByNameUseCase: GetFilterByNameUseCase
+    private val getFilterWithNotesByNameUseCase: GetFilterWithNotesByNameUseCase
 ) : ViewModel() {
 
     private val TAG = "NotesViewModelTag"
@@ -54,7 +54,7 @@ class NotesViewModel @Inject constructor(
     }
 
     fun getFilterByName(name: String) {
-        getFilterByNameUseCase(name)
+        getFilterWithNotesByNameUseCase(name)
             .subscribeOn(Schedulers.io())
             .subscribeOn(AndroidSchedulers.mainThread())
             .subscribe({

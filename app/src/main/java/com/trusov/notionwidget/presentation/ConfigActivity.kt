@@ -1,7 +1,9 @@
 package com.trusov.notionwidget.presentation
 
 import android.appwidget.AppWidgetManager
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.widget.ArrayAdapter
@@ -47,39 +49,46 @@ class ConfigActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val sp = getSharedPreferences(WIDGET_PREF, MODE_PRIVATE)
-        val editor = sp.edit()
-        if (sp.contains("$CHECKED_COLOR_BTN-$widgetId")) {
-            binding.rgColor.check(sp.getInt("$CHECKED_COLOR_BTN-$widgetId", 0))
-        }
-        if (sp.contains("$CHECKED_TEXT_SIZE_BTN-$widgetId")) {
-            binding.rgTextSizes.check(sp.getInt("$CHECKED_TEXT_SIZE_BTN-$widgetId", 0))
-        }
 
-        setupSpinner()
+        setupRadioButtons(sp)
+        setupSpinner(sp)
 
-        binding.rgColor.setOnCheckedChangeListener { radioGroup, id -> setSelectedColor(id) }
-
-        binding.rgTextSizes.setOnCheckedChangeListener { radioGroup, id -> setTextSize(id)}
-
+        binding.rgColor.setOnCheckedChangeListener { radioGroup, id -> getColorId(id) }
+        binding.rgTextSizes.setOnCheckedChangeListener { radioGroup, id -> getTextSizeId(id)}
         binding.buttonSaveConfig.setOnClickListener {
-            val checkedColorId = binding.rgColor.checkedRadioButtonId
-            val checkedTextSizeId = binding.rgTextSizes.checkedRadioButtonId
-            setSelectedColor(checkedColorId)
-            setTextSize(checkedTextSizeId)
-            editor.putInt("$WIDGET_COLOR-$widgetId", color)
-            editor.putInt("$WIDGET_TEXT_SIZE-$widgetId", textSize)
-            editor.putInt("$CHECKED_COLOR_BTN-$widgetId", checkedColorId)
-            editor.putInt("$CHECKED_TEXT_SIZE_BTN-$widgetId", checkedTextSizeId)
-            editor.apply()
-
+            saveInputs(sp)
             setResult(RESULT_OK, resultValue)
             sendBroadcast(resultValue)
             finish()
         }
     }
 
-    private fun setSelectedColor(id: Int) {
-        color = when (id) {
+    private fun saveInputs(sp: SharedPreferences) {
+        val checkedColorId = binding.rgColor.checkedRadioButtonId
+        val checkedTextSizeId = binding.rgTextSizes.checkedRadioButtonId
+        val filterName = binding.spinnerFilters.selectedItem.toString()
+        val colorId = getColorId(checkedColorId)
+        val textSizeId = getTextSizeId(checkedTextSizeId)
+        val editor = sp.edit()
+        editor.putInt("$WIDGET_COLOR-$widgetId", colorId)
+        editor.putInt("$WIDGET_TEXT_SIZE-$widgetId", textSizeId)
+        editor.putInt("$CHECKED_COLOR_BTN-$widgetId", checkedColorId)
+        editor.putInt("$CHECKED_TEXT_SIZE_BTN-$widgetId", checkedTextSizeId)
+        editor.putString("$WIDGET_FILTER-$widgetId", filterName)
+        editor.apply()
+    }
+
+    private fun setupRadioButtons(sp: SharedPreferences) {
+        if (sp.contains("$CHECKED_COLOR_BTN-$widgetId")) {
+            binding.rgColor.check(sp.getInt("$CHECKED_COLOR_BTN-$widgetId", 0))
+        }
+        if (sp.contains("$CHECKED_TEXT_SIZE_BTN-$widgetId")) {
+            binding.rgTextSizes.check(sp.getInt("$CHECKED_TEXT_SIZE_BTN-$widgetId", 0))
+        }
+    }
+
+    private fun getColorId(id: Int): Int {
+        return when (id) {
             R.id.radioRed -> Color.DKGRAY
             R.id.radioGreen -> Color.GREEN
             R.id.radioBlue -> Color.BLUE
@@ -87,8 +96,8 @@ class ConfigActivity : AppCompatActivity() {
         }
     }
 
-    private fun setTextSize(id: Int) {
-        textSize = when (id) {
+    private fun getTextSizeId(id: Int): Int {
+        return when (id) {
             R.id.radioSizeSmall -> SMALL_TEXT_SIZE
             R.id.radioSizeMedium -> MEDIUM_TEXT_SIZE
             R.id.radioSizeBig -> BIG_TEXT_SIZE
@@ -96,19 +105,23 @@ class ConfigActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupSpinner() {
+    private fun setupSpinner(sp: SharedPreferences) {
         getFiltersUseCase()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
+            .subscribe { filters ->
+                val names = filters.map { it.name }
                 ArrayAdapter(
                     this,
                     android.R.layout.simple_spinner_item,
-                    it.map { it.name }
+                    names
                 ).also { adapter ->
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     binding.spinnerFilters.adapter = adapter
                 }
+                val filterName = sp.getString("${WIDGET_FILTER}-$widgetId", null)
+                val index = names.indexOf(filterName)
+                binding.spinnerFilters.setSelection(index)
             }
     }
 
@@ -118,6 +131,7 @@ class ConfigActivity : AppCompatActivity() {
         const val WIDGET_PREF = "widget_pref"
         const val WIDGET_COLOR = "widget_color_"
         const val WIDGET_TEXT_SIZE = "widget_text_size_"
+        const val WIDGET_FILTER = "widget_filter"
         const val CHECKED_COLOR_BTN = "checked_color_btn"
         const val CHECKED_TEXT_SIZE_BTN = "checked_text_size_btn"
 
@@ -127,7 +141,5 @@ class ConfigActivity : AppCompatActivity() {
 
         private var widgetId = AppWidgetManager.INVALID_APPWIDGET_ID
         private var resultValue: Intent? = null
-        private var color: Int = Color.RED
-        private var textSize: Int = 14
     }
 }
