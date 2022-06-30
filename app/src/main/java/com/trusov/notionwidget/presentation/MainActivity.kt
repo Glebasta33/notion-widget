@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
 import com.trusov.notionwidget.App
 import com.trusov.notionwidget.R
 import com.trusov.notionwidget.data.retrofit.ApiFactory
@@ -33,7 +34,8 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
-                Toast.makeText(this, "${item.itemId}", Toast.LENGTH_SHORT).show()
+                binding.drawerLayout.openDrawer(GravityCompat.START)
+                return true
             }
         }
         return super.onOptionsItemSelected(item)
