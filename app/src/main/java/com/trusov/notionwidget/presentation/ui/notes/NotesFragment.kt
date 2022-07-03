@@ -7,9 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import com.trusov.notionwidget.App
 import com.trusov.notionwidget.databinding.FragmentNotesBinding
 import com.trusov.notionwidget.di.ViewModelFactory
+import com.trusov.notionwidget.domain.entity.note.Note
 import javax.inject.Inject
 
 class NotesFragment : Fragment() {
@@ -45,9 +47,12 @@ class NotesFragment : Fragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {8
         super.onViewCreated(view, savedInstanceState)
-        binding.tvTesting.text = "NotesFragment: $filterName"
+        val adapter = NoteAdapter()
+        binding.rvNotes.adapter = adapter
+        binding.rvNotes.layoutManager = GridLayoutManager(activity, 2)
+        adapter.submitList(listOf(Note("1"), Note("2"), Note("3"), Note("4")))
     }
 
     override fun onDestroyView() {
