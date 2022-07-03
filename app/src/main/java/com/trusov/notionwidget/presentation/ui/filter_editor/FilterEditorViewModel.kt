@@ -11,6 +11,7 @@ import com.trusov.notionwidget.data.dto.note.NoteDbModel
 import com.trusov.notionwidget.data.local.NotesDao
 import com.trusov.notionwidget.data.retrofit.ApiService
 import com.trusov.notionwidget.domain.entity.*
+import com.trusov.notionwidget.domain.entity.note.Note
 import com.trusov.notionwidget.domain.use_case.*
 import com.trusov.notionwidget.presentation.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -81,7 +82,7 @@ class FilterEditorViewModel @Inject constructor(
                             texts.add(text)
                             Log.d(TAG, "text: $text")
                         }, {}, {
-                            _state.postValue(NotesResult(texts))
+                            _state.postValue(NotesResult(texts.map { Note(it) }))
                         })
                 }
             }, {

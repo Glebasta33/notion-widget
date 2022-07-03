@@ -12,6 +12,8 @@ import com.trusov.notionwidget.App
 import com.trusov.notionwidget.databinding.FragmentNotesBinding
 import com.trusov.notionwidget.di.ViewModelFactory
 import com.trusov.notionwidget.domain.entity.note.Note
+import com.trusov.notionwidget.presentation.Loading
+import com.trusov.notionwidget.presentation.NotesResult
 import javax.inject.Inject
 
 class NotesFragment : Fragment() {
@@ -29,13 +31,13 @@ class NotesFragment : Fragment() {
         )[NotesViewModel::class.java]
     }
 
-    private var filterName: String? = null
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         (activity?.application as App).component.inject(this)
         arguments?.let { args ->
-            filterName = args.getString("FilterName")
+            args.getString("FilterName").let { filterName ->
+                viewModel.getFilterByName(filterName!!)
+            }
         }
     }
 
@@ -47,12 +49,19 @@ class NotesFragment : Fragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {8
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val adapter = NoteAdapter()
         binding.rvNotes.adapter = adapter
         binding.rvNotes.layoutManager = GridLayoutManager(activity, 2)
-        adapter.submitList(listOf(Note("1"), Note("2"), Note("3"), Note("4")))
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is NotesResult -> {
+                    adapter.submitList(state.value)
+                }
+                else -> {}
+            }
+        }
     }
 
     override fun onDestroyView() {

@@ -1,11 +1,12 @@
 package com.trusov.notionwidget.presentation
 
+import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import com.trusov.notionwidget.App
 import com.trusov.notionwidget.R
@@ -34,8 +35,8 @@ class MainActivity : AppCompatActivity() {
         binding.toolbar.apply {
             setSupportActionBar(this)
             navigationIcon = ContextCompat.getDrawable(this@MainActivity, R.drawable.ic_menu)
+            setTitleTextColor(Color.WHITE)
         }
-
         setupDrawer()
 
     }
@@ -45,17 +46,33 @@ class MainActivity : AppCompatActivity() {
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 val filters = it.map { it.name }
+                val defaultFilter = filters[0]
+                updateNotesByFilter(defaultFilter)
+                setToolbarTitle(defaultFilter)
                 for (filter in filters) {
                     binding.nvView.menu.add(filter)
                 }
             }
         compositeDisposable.add(disposable)
+
         binding.nvView.setNavigationItemSelectedListener {
-            val args = Bundle().apply {
-                putString("FilterName", it.title.toString())
-            }
-            findNavController(R.id.nav_host_fragment).navigate(R.id.action_notesFragment_self, args)
+            updateNotesByFilter(it.title.toString())
+            binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
             true
+        }
+    }
+
+    private fun updateNotesByFilter(filterName: String) {
+        setToolbarTitle(filterName)
+        val args = Bundle().apply {
+            putString("FilterName", filterName)
+        }
+        findNavController(R.id.nav_host_fragment).navigate(R.id.action_notesFragment_self, args)
+    }
+
+    private fun setToolbarTitle(filterName: String) {
+        binding.toolbar.apply {
+            title = filterName
         }
     }
 

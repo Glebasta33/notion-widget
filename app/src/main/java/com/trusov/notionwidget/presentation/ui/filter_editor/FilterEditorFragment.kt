@@ -73,7 +73,7 @@ class FilterEditorFragment : Fragment() {
             binding.progressBar.isGone = true
             when(state) {
                 is NotesResult -> {
-                    setupTexts(state.value)
+                    setupTexts(state.value.map { it.text })
                 }
                 is PropertiesResult -> {
                     val options = state.value[Property("Topic")]?.map { p -> p.name }
