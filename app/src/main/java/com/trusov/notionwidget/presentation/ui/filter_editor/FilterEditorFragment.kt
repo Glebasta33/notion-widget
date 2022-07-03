@@ -1,8 +1,7 @@
-package com.trusov.notionwidget.presentation
+package com.trusov.notionwidget.presentation.ui.filter_editor
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,20 +11,18 @@ import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.trusov.notionwidget.App
-import com.trusov.notionwidget.data.dto.note.NoteDbModel
-import com.trusov.notionwidget.databinding.NotesFragmentBinding
+import com.trusov.notionwidget.databinding.FragmentFilterEditorBinding
 import com.trusov.notionwidget.di.ViewModelFactory
 import com.trusov.notionwidget.domain.entity.Property
 import com.trusov.notionwidget.domain.use_case.GetPageBlocksUseCase
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.schedulers.Schedulers
+import com.trusov.notionwidget.presentation.*
 import javax.inject.Inject
 
-class NotesFragment : Fragment() {
+class FilterEditorFragment : Fragment() {
 
-    private var _binding: NotesFragmentBinding? = null
-    private val binding: NotesFragmentBinding
-        get() = _binding ?: throw RuntimeException("NotesFragmentBinding == null")
+    private var _binding: FragmentFilterEditorBinding? = null
+    private val binding: FragmentFilterEditorBinding
+        get() = _binding ?: throw RuntimeException("FragmentFilterEditorBinding == null")
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
@@ -33,7 +30,7 @@ class NotesFragment : Fragment() {
         ViewModelProvider(
             this,
             viewModelFactory
-        )[NotesViewModel::class.java]
+        )[FilterEditorViewModel::class.java]
     }
 
     // TODO: remove after testing:
@@ -51,7 +48,7 @@ class NotesFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = NotesFragmentBinding.inflate(inflater, container, false)
+        _binding = FragmentFilterEditorBinding.inflate(inflater, container, false)
         return binding.root
     }
 

@@ -1,4 +1,4 @@
-package com.trusov.notionwidget.presentation
+package com.trusov.notionwidget.presentation.ui.filter_editor
 
 import android.app.Application
 import android.util.Log
@@ -12,13 +12,14 @@ import com.trusov.notionwidget.data.local.NotesDao
 import com.trusov.notionwidget.data.retrofit.ApiService
 import com.trusov.notionwidget.domain.entity.*
 import com.trusov.notionwidget.domain.use_case.*
+import com.trusov.notionwidget.presentation.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.util.regex.Pattern
 import javax.inject.Inject
 
-class NotesViewModel @Inject constructor(
+class FilterEditorViewModel @Inject constructor(
     private val getPageIdsUseCase: LoadPageIdsUseCase,
     private val getPageBlocksUseCase: GetPageBlocksUseCase,
     private val getDatabaseUseCase: GetDatabaseUseCase,
