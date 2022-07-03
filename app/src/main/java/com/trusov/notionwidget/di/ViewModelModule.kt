@@ -1,7 +1,7 @@
 package com.trusov.notionwidget.di
 
 import androidx.lifecycle.ViewModel
-import com.trusov.notionwidget.presentation.NotesViewModel
+import com.trusov.notionwidget.presentation.ui.filter_editor.FilterEditorViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -11,7 +11,7 @@ interface ViewModelModule {
 
     @IntoMap
     @Binds
-    @ViewModelKey(NotesViewModel::class)
-    fun bindNotesViewModel(viewModel: NotesViewModel): ViewModel
+    @ViewModelKey(FilterEditorViewModel::class)
+    fun bindNotesViewModel(viewModel: FilterEditorViewModel): ViewModel
 
 }

@@ -4,7 +4,7 @@ import android.app.Application
 import com.trusov.notionwidget.data.NoteAppWidgetProvider
 import com.trusov.notionwidget.presentation.ConfigActivity
 import com.trusov.notionwidget.presentation.MainActivity
-import com.trusov.notionwidget.presentation.NotesFragment
+import com.trusov.notionwidget.presentation.ui.filter_editor.FilterEditorFragment
 import dagger.BindsInstance
 import dagger.Component
 
@@ -18,7 +18,7 @@ import dagger.Component
 interface ApplicationComponent {
 
     fun inject(instance: MainActivity)
-    fun inject(instance: NotesFragment)
+    fun inject(instance: FilterEditorFragment)
     fun inject(instance: NoteAppWidgetProvider)
     fun inject(instance: ConfigActivity)
 

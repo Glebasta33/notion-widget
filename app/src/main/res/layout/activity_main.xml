@@ -23,7 +23,7 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/fragment_container_main"
-            android:name="com.trusov.notionwidget.presentation.NotesFragment"
+            android:name="com.trusov.notionwidget.presentation.ui.filter_editor.FilterEditorFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:defaultNavHost="true"
