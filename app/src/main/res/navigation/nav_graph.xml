@@ -7,7 +7,11 @@
 
     <fragment
         android:id="@+id/notesFragment"
-        android:name="com.trusov.notionwidget.presentation.ui.filter_editor.FilterEditorFragment"
-        android:label="notes_fragment"
-        tools:layout="@layout/fragment_filter_editor" />
+        android:name="com.trusov.notionwidget.presentation.ui.notes.NotesFragment"
+        android:label="fragment_notes"
+        tools:layout="@layout/fragment_notes" >
+        <action
+            android:id="@+id/action_notesFragment_self"
+            app:destination="@id/notesFragment" />
+    </fragment>
 </navigation>

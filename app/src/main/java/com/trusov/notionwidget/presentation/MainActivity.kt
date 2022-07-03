@@ -1,26 +1,24 @@
 package com.trusov.notionwidget.presentation
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
+import androidx.navigation.findNavController
 import com.trusov.notionwidget.App
 import com.trusov.notionwidget.R
-import com.trusov.notionwidget.data.retrofit.ApiFactory
-import com.trusov.notionwidget.data.retrofit.ApiService
 import com.trusov.notionwidget.databinding.ActivityMainBinding
 import com.trusov.notionwidget.domain.use_case.GetFiltersUseCase
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
-import kotlinx.coroutines.*
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
 
+    private val TAG = "MainActivityTag"
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
@@ -38,8 +36,13 @@ class MainActivity : AppCompatActivity() {
             navigationIcon = ContextCompat.getDrawable(this@MainActivity, R.drawable.ic_menu)
         }
 
+        setupDrawer()
+
+    }
+
+    private fun setupDrawer() {
         val disposable = getFiltersUseCase()
-            .observeOn(Schedulers.io()).subscribeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 val filters = it.map { it.name }
                 for (filter in filters) {
@@ -47,8 +50,13 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         compositeDisposable.add(disposable)
-
-
+        binding.nvView.setNavigationItemSelectedListener {
+            val args = Bundle().apply {
+                putString("FilterName", it.title.toString())
+            }
+            findNavController(R.id.nav_host_fragment).navigate(R.id.action_notesFragment_self, args)
+            true
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
