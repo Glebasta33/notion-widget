@@ -2,7 +2,9 @@ package com.trusov.notionwidget.presentation
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -47,32 +49,66 @@ class MainActivity : AppCompatActivity() {
             .subscribe {
                 val filters = it.map { it.name }
                 val defaultFilter = filters[0]
-                updateNotesByFilter(defaultFilter)
+                updateFragment(defaultFilter, R.id.action_notesFragment_self)
                 setToolbarTitle(defaultFilter)
                 for (filter in filters) {
                     binding.nvView.menu.add(filter)
                 }
+                binding.nvView.menu.add(ADD_FILTER_DRAWER_ITEM).setIcon(R.drawable.ic_add)
+                    .setOnMenuItemClickListener {
+                        updateFragment(
+                            it.title.toString(),
+                            R.id.action_notesFragment_to_filterEditorFragment
+                        )
+                        true
+                    }
             }
         compositeDisposable.add(disposable)
 
         binding.nvView.setNavigationItemSelectedListener {
-            updateNotesByFilter(it.title.toString())
-            binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+            updateFragment(it.title.toString(), R.id.action_notesFragment_self)
             true
         }
     }
 
-    private fun updateNotesByFilter(filterName: String) {
+    private fun updateFragment(filterName: String, action: Int) {
         setToolbarTitle(filterName)
+        navigateToFragment(filterName, action)
+    }
+
+    private fun navigateToFragment(filterName: String, action: Int) {
         val args = Bundle().apply {
             putString("FilterName", filterName)
         }
-        findNavController(R.id.nav_host_fragment).navigate(R.id.action_notesFragment_self, args)
+        Log.d(
+            "FindNavTag",
+            "currentBackStackEntry: ${findNavController(R.id.nav_host_fragment).currentBackStackEntry.toString()}"
+        )
+        try {
+            val label = findNavController(R.id.nav_host_fragment).currentDestination?.label
+            if (label == "fragment_filter_editor") {
+                if (action == R.id.action_notesFragment_self) {
+                    findNavController(R.id.nav_host_fragment).navigate(R.id.action_filterEditorFragment_to_notesFragment, args)
+                }
+                if (action == R.id.action_notesFragment_to_filterEditorFragment) {
+                    findNavController(R.id.nav_host_fragment).navigate(R.id.action_filterEditorFragment_self, args)
+                }
+            } else {
+                findNavController(R.id.nav_host_fragment).navigate(action, args)
+            }
+
+        } catch (e: Exception) {
+            Log.d(TAG, e.message!!)
+        }
+
+        binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
     }
 
     private fun setToolbarTitle(filterName: String) {
-        binding.toolbar.apply {
-            title = filterName
+        if (filterName != ADD_FILTER_DRAWER_ITEM) {
+            binding.toolbar.title = filterName
+        } else {
+            binding.toolbar.title = " "
         }
     }
 
@@ -90,4 +126,9 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         compositeDisposable.clear()
     }
+
+    companion object {
+        private const val ADD_FILTER_DRAWER_ITEM = "Add filter"
+    }
+
 }

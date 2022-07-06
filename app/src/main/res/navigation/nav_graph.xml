@@ -13,5 +13,20 @@
         <action
             android:id="@+id/action_notesFragment_self"
             app:destination="@id/notesFragment" />
+        <action
+            android:id="@+id/action_notesFragment_to_filterEditorFragment"
+            app:destination="@id/filterEditorFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/filterEditorFragment"
+        android:name="com.trusov.notionwidget.presentation.ui.filter_editor.FilterEditorFragment"
+        android:label="fragment_filter_editor"
+        tools:layout="@layout/fragment_filter_editor" >
+        <action
+            android:id="@+id/action_filterEditorFragment_to_notesFragment"
+            app:destination="@id/notesFragment" />
+        <action
+            android:id="@+id/action_filterEditorFragment_self"
+            app:destination="@id/filterEditorFragment" />
     </fragment>
 </navigation>

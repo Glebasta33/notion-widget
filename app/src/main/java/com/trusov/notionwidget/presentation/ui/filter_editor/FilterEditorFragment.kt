@@ -42,6 +42,11 @@ class FilterEditorFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         (activity?.application as App).component.inject(this)
+        arguments?.let { args ->
+            args.getString("FilterName").let { filterName ->
+                //viewModel.getFilterByName(filterName!!)
+            }
+        }
     }
 
     override fun onCreateView(
