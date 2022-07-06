@@ -45,6 +45,7 @@ class FilterEditorFragment : Fragment() {
         arguments?.let { args ->
             args.getString("FilterName").let { filterName ->
                 //viewModel.getFilterByName(filterName!!)
+                Toast.makeText(activity, filterName, Toast.LENGTH_SHORT).show()
             }
         }
     }

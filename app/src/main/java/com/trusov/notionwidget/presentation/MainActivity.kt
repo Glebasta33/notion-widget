@@ -3,6 +3,7 @@ package com.trusov.notionwidget.presentation
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -40,7 +41,11 @@ class MainActivity : AppCompatActivity() {
             setTitleTextColor(Color.WHITE)
         }
         setupDrawer()
+    }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.toolbar_menu, menu)
+        return super.onCreateOptionsMenu(menu)
     }
 
     private fun setupDrawer() {
@@ -72,6 +77,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateFragment(filterName: String, action: Int) {
+        currentFilterName = filterName
         setToolbarTitle(filterName)
         navigateToFragment(filterName, action)
     }
@@ -80,27 +86,23 @@ class MainActivity : AppCompatActivity() {
         val args = Bundle().apply {
             putString("FilterName", filterName)
         }
-        Log.d(
-            "FindNavTag",
-            "currentBackStackEntry: ${findNavController(R.id.nav_host_fragment).currentBackStackEntry.toString()}"
-        )
-        try {
-            val label = findNavController(R.id.nav_host_fragment).currentDestination?.label
-            if (label == "fragment_filter_editor") {
-                if (action == R.id.action_notesFragment_self) {
-                    findNavController(R.id.nav_host_fragment).navigate(R.id.action_filterEditorFragment_to_notesFragment, args)
-                }
-                if (action == R.id.action_notesFragment_to_filterEditorFragment) {
-                    findNavController(R.id.nav_host_fragment).navigate(R.id.action_filterEditorFragment_self, args)
-                }
-            } else {
-                findNavController(R.id.nav_host_fragment).navigate(action, args)
+        val label = findNavController(R.id.nav_host_fragment).currentDestination?.label
+        if (label == "fragment_filter_editor") {
+            if (action == R.id.action_notesFragment_self) {
+                findNavController(R.id.nav_host_fragment).navigate(
+                    R.id.action_filterEditorFragment_to_notesFragment,
+                    args
+                )
             }
-
-        } catch (e: Exception) {
-            Log.d(TAG, e.message!!)
+            if (action == R.id.action_notesFragment_to_filterEditorFragment) {
+                findNavController(R.id.nav_host_fragment).navigate(
+                    R.id.action_filterEditorFragment_self,
+                    args
+                )
+            }
+        } else {
+            findNavController(R.id.nav_host_fragment).navigate(action, args)
         }
-
         binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
     }
 
@@ -116,7 +118,9 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId) {
             android.R.id.home -> {
                 binding.drawerLayout.openDrawer(GravityCompat.START)
-                return true
+            }
+            R.id.menu_edit -> {
+                updateFragment(currentFilterName!!, R.id.action_notesFragment_to_filterEditorFragment)
             }
         }
         return super.onOptionsItemSelected(item)
@@ -129,6 +133,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val ADD_FILTER_DRAWER_ITEM = "Add filter"
+        private var currentFilterName: String? = null
     }
 
 }
