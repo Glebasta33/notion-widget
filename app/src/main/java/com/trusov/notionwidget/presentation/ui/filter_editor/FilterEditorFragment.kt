@@ -11,6 +11,7 @@ import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.trusov.notionwidget.App
+import com.trusov.notionwidget.R
 import com.trusov.notionwidget.databinding.FragmentFilterEditorBinding
 import com.trusov.notionwidget.di.ViewModelFactory
 import com.trusov.notionwidget.domain.entity.Property
@@ -60,20 +61,7 @@ class FilterEditorFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.loadDbProperties()
-
-/*        Fetching all notes from room:
-        viewModel.db
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ models ->
-                if (models.isNotEmpty()) {
-                    val texts = models.map { it.text }
-                    setupTexts(texts)
-                }
-            }, {
-                Toast.makeText(activity, "OnError: ${it.message}", Toast.LENGTH_SHORT).show()
-            })*/
+        viewModel.getProperties(requireActivity().application.getString(R.string.zettel_db_id))
 
         viewModel.state.observe(viewLifecycleOwner) { state ->
             binding.progressBar.isGone = true
@@ -82,12 +70,11 @@ class FilterEditorFragment : Fragment() {
                     setupTexts(state.value.map { it.text })
                 }
                 is PropertiesResult -> {
-                    val options = state.value[Property("Topic")]?.map { p -> p.name }
-                    options?.let {
+                    state.value.let { properties ->
                         ArrayAdapter(
                             requireActivity(),
                             android.R.layout.simple_spinner_item,
-                            options
+                            properties.map { it.name }
                         ).also { adapter ->
                             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                             binding.spinnerTags.adapter = adapter

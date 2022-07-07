@@ -1,6 +1,5 @@
 package com.trusov.notionwidget.presentation
 
-import com.trusov.notionwidget.domain.entity.Option
 import com.trusov.notionwidget.domain.entity.Property
 import com.trusov.notionwidget.domain.entity.note.Note
 
@@ -17,5 +16,5 @@ class NotesResult(
 ) : State()
 
 class PropertiesResult(
-    val value: Map<Property, List<Option>>
+    val value: List<Property>
 ) : State()

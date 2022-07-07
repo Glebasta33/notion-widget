@@ -3,8 +3,7 @@ package com.trusov.notionwidget.data.retrofit
 import com.google.gson.JsonElement
 import com.trusov.notionwidget.data.dto.NoteIdsDto
 import com.trusov.notionwidget.data.dto.block.BlockResponseDto
-import com.trusov.notionwidget.data.dto.db.DbDto
-import com.trusov.notionwidget.data.dto.filter.*
+import com.trusov.notionwidget.data.dto.filter.FilterDto
 import io.reactivex.rxjava3.core.Observable
 import retrofit2.Response
 import retrofit2.http.Body
@@ -25,10 +24,10 @@ interface ApiService {
         @Path("pageId") pageId: String
     ): Observable<BlockResponseDto>
 
-    @GET("databases/{db}")
+/*    @GET("databases/{db}")
     fun getDatabase(
         @Path("db") dbId: String
-    ): Observable<DbDto>
+    ): Observable<DbDto>*/
 
     @GET("databases/{db}")
     fun getDatabaseJson(

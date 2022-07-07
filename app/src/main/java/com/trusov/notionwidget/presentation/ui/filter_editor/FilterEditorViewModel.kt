@@ -21,25 +21,18 @@ import java.util.regex.Pattern
 import javax.inject.Inject
 
 class FilterEditorViewModel @Inject constructor(
-    private val getPageIdsUseCase: LoadPageIdsUseCase,
+    private val loadPageIdsUseCase: LoadPageIdsUseCase,
     private val getPageBlocksUseCase: GetPageBlocksUseCase,
-    private val getDatabaseUseCase: GetDatabaseUseCase,
     private val application: Application,
     private val notesDao: NotesDao,
     private val apiService: ApiService,
     private val createFilterUseCase: CreateFilterUseCase,
     private val getFiltersUseCase: GetFiltersUseCase,
-    private val getFilterWithNotesByNameUseCase: GetFilterWithNotesByNameUseCase
+    private val getFilterWithNotesByNameUseCase: GetFilterWithNotesByNameUseCase,
+    private val getPropertiesUseCase: GetPropertiesUseCase
 ) : ViewModel() {
 
-    private val TAG = "NotesViewModelTag"
     val db = notesDao.getNotes()
-
-//    private val _properties = MutableLiveData<Map<Property, List<Option>>>()
-//    val properties: LiveData<Map<Property, List<Option>>> = _properties
-//
-//    private val _texts = MutableLiveData<List<String>>()
-//    val texts: LiveData<List<String>> = _texts
 
     private val _state = MutableLiveData<State>()
     val state: LiveData<State> = _state
@@ -147,7 +140,8 @@ class FilterEditorViewModel @Inject constructor(
             })
     }
 
-    private fun loadNotesIds(option: String) = getPageIdsUseCase(
+    // TODO: add filter: Filter as parameter of method
+    private fun loadNotesIds(option: String) = loadPageIdsUseCase(
         application.resources.getString(R.string.zettel_db_id),
         Filter(
             rules = mutableListOf(
@@ -169,60 +163,16 @@ class FilterEditorViewModel @Inject constructor(
 
     // private fun buildFilter(propertyName, propertyType: Type, condition: Condition, optionName: String, color: Color, ...): Filter {  }
 
-    fun loadDbProperties() {
-        // TODO: перенести в логику в getDatabaseUseCase,
-        //  реализовать сохранение в таблцу options(?)(id, option_name, option_type, color, property).
-        apiService.getDatabaseJson(application.resources.getString(R.string.zettel_db_id))
+    fun getProperties(dbId: String) {
+        getPropertiesUseCase(dbId)
             .subscribeOn(Schedulers.io())
-            .observeOn(Schedulers.io())
-            .subscribe({
-                if (it.isSuccessful) {
-                    val dbAsString = it.body().toString()
-                    val dbAsJson = it.body()?.asJsonObject
-                    val propertiesJson = dbAsJson?.getAsJsonObject("properties")
-                    val map = mutableMapOf<Property, List<Option>>()
-                    parsePropertyNames(dbAsString).forEach { propertyName ->
-                        val p = propertiesJson?.getAsJsonObject(propertyName)
-                        val optionsJson =
-                            p?.getAsJsonObject("multi_select")?.getAsJsonArray("options")
-                        val options = mutableListOf<Option>()
-                        optionsJson?.forEach {
-                            val optionJson = it as JsonObject
-                            val option = Option(
-                                name = optionJson.get("name").asString,
-                                color = optionJson.get("color").asString
-                            )
-                            options.add(option)
-                        }
-                        val property = Property(name = propertyName)
-                        map.put(property, options)
-                    }
-                    _state.postValue(PropertiesResult(map))
-                    Log.d(TAG, map.toString())
-                } else {
-                    Log.d(TAG, "not successful: ${it.code()}")
-                }
-            }, {
-                Log.d(TAG, it.message ?: "onError")
-            })
-    }
-
-    private fun parsePropertyNames(body: String): List<String> {
-        val properties = mutableListOf<String>()
-        val pattern = Pattern.compile("$PROPERTY_START(\\w+)$PROPERTY_END")
-        val matcher = pattern.matcher(body)
-        while (matcher.find()) {
-            val property = matcher.group(1)?.toString()
-            property?.let { property ->
-                properties.add(property)
+            .subscribe {
+                _state.postValue(PropertiesResult(it))
             }
-        }
-        return properties
     }
 
     companion object {
-        private const val PROPERTY_START = "\"name\":\""
-        private const val PROPERTY_END = "\",\"type"
+        private const val TAG = "NotesViewModelTag"
     }
 
 }
