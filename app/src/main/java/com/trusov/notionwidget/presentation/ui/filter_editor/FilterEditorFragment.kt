@@ -14,9 +14,13 @@ import com.trusov.notionwidget.App
 import com.trusov.notionwidget.R
 import com.trusov.notionwidget.databinding.FragmentFilterEditorBinding
 import com.trusov.notionwidget.di.ViewModelFactory
-import com.trusov.notionwidget.domain.entity.Property
+import com.trusov.notionwidget.domain.entity.Condition
 import com.trusov.notionwidget.domain.use_case.GetPageBlocksUseCase
-import com.trusov.notionwidget.presentation.*
+import com.trusov.notionwidget.presentation.Error
+import com.trusov.notionwidget.presentation.Loading
+import com.trusov.notionwidget.presentation.NotesResult
+import com.trusov.notionwidget.presentation.PropertiesResult
+import java.util.*
 import javax.inject.Inject
 
 class FilterEditorFragment : Fragment() {
@@ -62,10 +66,10 @@ class FilterEditorFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.getProperties(requireActivity().application.getString(R.string.zettel_db_id))
-
+        setupSpinnerConditions()
         viewModel.state.observe(viewLifecycleOwner) { state ->
             binding.progressBar.isGone = true
-            when(state) {
+            when (state) {
                 is NotesResult -> {
                     setupTexts(state.value.map { it.text })
                 }
@@ -77,7 +81,7 @@ class FilterEditorFragment : Fragment() {
                             properties.map { it.name }
                         ).also { adapter ->
                             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                            binding.spinnerTags.adapter = adapter
+                            binding.spinnerProperties.adapter = adapter
                         }
                     }
                 }
@@ -91,12 +95,12 @@ class FilterEditorFragment : Fragment() {
         }
 
         binding.buttonFilter.setOnClickListener {
-            val option = binding.spinnerTags.selectedItem.toString()
+            val option = binding.spinnerProperties.selectedItem.toString()
             viewModel.getNotes(option)
         }
 
         binding.buttonSaveFilter.setOnClickListener {
-            val option = binding.spinnerTags.selectedItem.toString()
+            val option = binding.spinnerProperties.selectedItem.toString()
             val filterName = binding.etFilterName.text.toString()
             viewModel.saveFilter(option, filterName)
             viewModel.saveNotes(option, filterName)
@@ -105,10 +109,21 @@ class FilterEditorFragment : Fragment() {
                 Toast.makeText(activity, "Filter \"$filterName\" saved", Toast.LENGTH_SHORT).show()
             }
         }
+    }
 
-//        viewModel.getFilters()
-//        viewModel.getFilterByName("Filter 2")
-
+    private fun setupSpinnerConditions() {
+        ArrayAdapter(
+            requireActivity(),
+            android.R.layout.simple_spinner_item,
+            Condition.values().map {
+                it.value.replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+                }
+            }
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            binding.spinnerConditions.adapter = adapter
+        }
     }
 
     private fun setupTexts(texts: List<String>) {
