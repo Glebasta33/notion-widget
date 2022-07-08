@@ -45,7 +45,8 @@ class FilterMapper @Inject constructor() {
             FilterRule(
                 property = Property(
                     name = rule.property.name,
-                    type = Type.values().find { it.value == rule.property.type }!!
+                    type = Type.values().find { it.value == rule.property.type }!!,
+                    options = null //временно!
                 ),
                 condition = Condition.values().find { it.value == rule.condition }!!,
                 option = Option(

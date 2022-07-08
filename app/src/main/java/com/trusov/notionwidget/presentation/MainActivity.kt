@@ -56,6 +56,9 @@ class MainActivity : AppCompatActivity() {
                 val defaultFilter = filters[0]
                 updateFragment(defaultFilter, R.id.action_notesFragment_self)
                 setToolbarTitle(defaultFilter)
+                if (binding.nvView.menu.hasVisibleItems()) {
+                    binding.nvView.menu.clear()
+                }
                 for (filter in filters) {
                     binding.nvView.menu.add(filter)
                 }

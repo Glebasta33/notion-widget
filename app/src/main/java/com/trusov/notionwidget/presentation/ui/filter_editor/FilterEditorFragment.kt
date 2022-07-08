@@ -2,10 +2,13 @@ package com.trusov.notionwidget.presentation.ui.filter_editor
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
@@ -75,14 +78,23 @@ class FilterEditorFragment : Fragment() {
                 }
                 is PropertiesResult -> {
                     state.value.let { properties ->
-                        ArrayAdapter(
-                            requireActivity(),
-                            android.R.layout.simple_spinner_item,
-                            properties.map { it.name }
-                        ).also { adapter ->
-                            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                            binding.spinnerProperties.adapter = adapter
-                        }
+                        binding.spinnerProperties.setListOfStrings(properties.map { it.name })
+                        binding.spinnerProperties.onItemSelectedListener =
+                            object : AdapterView.OnItemSelectedListener {
+                                override fun onItemSelected(
+                                    parent: AdapterView<*>?,
+                                    view: View?,
+                                    position: Int,
+                                    id: Long
+                                ) {
+                                    val p = properties[position]
+                                    Log.d(TAG, p.toString())
+                                    properties[position].options?.let { options ->
+                                        binding.spinnerOptions.setListOfStrings(options.map { it.name })
+                                    }
+                                }
+                                override fun onNothingSelected(parent: AdapterView<*>?) {}
+                            }
                     }
                 }
                 is Error -> {
@@ -95,15 +107,19 @@ class FilterEditorFragment : Fragment() {
         }
 
         binding.buttonFilter.setOnClickListener {
-            val option = binding.spinnerProperties.selectedItem.toString()
-            viewModel.getNotes(option)
+            val property = binding.spinnerProperties.selectedItem.toString()
+            val condition = binding.spinnerConditions.selectedItem.toString().lowercase()
+            val option = binding.spinnerOptions.selectedItem.toString()
+            viewModel.getNotes(property, condition, option)
         }
 
         binding.buttonSaveFilter.setOnClickListener {
-            val option = binding.spinnerProperties.selectedItem.toString()
+            val property = binding.spinnerProperties.selectedItem.toString()
+            val condition = binding.spinnerConditions.selectedItem.toString().lowercase()
+            val option = binding.spinnerOptions.selectedItem.toString()
             val filterName = binding.etFilterName.text.toString()
-            viewModel.saveFilter(option, filterName)
-            viewModel.saveNotes(option, filterName)
+            viewModel.saveFilter(property, condition, option, filterName)
+            viewModel.saveNotes(property, condition, option, filterName)
             binding.etFilterName.text.clear()
             if (filterName.isNotEmpty()) {
                 Toast.makeText(activity, "Filter \"$filterName\" saved", Toast.LENGTH_SHORT).show()
@@ -112,18 +128,12 @@ class FilterEditorFragment : Fragment() {
     }
 
     private fun setupSpinnerConditions() {
-        ArrayAdapter(
-            requireActivity(),
-            android.R.layout.simple_spinner_item,
-            Condition.values().map {
-                it.value.replaceFirstChar {
-                    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
-                }
+        val conditions = Condition.values().map {
+            it.value.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
             }
-        ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            binding.spinnerConditions.adapter = adapter
         }
+        binding.spinnerConditions.setListOfStrings(conditions)
     }
 
     private fun setupTexts(texts: List<String>) {
@@ -136,6 +146,17 @@ class FilterEditorFragment : Fragment() {
                 index = 0
                 binding.tvText.text = texts[0]
             }
+        }
+    }
+
+    private fun Spinner.setListOfStrings(strings: List<String>) {
+        ArrayAdapter(
+            requireActivity(),
+            android.R.layout.simple_spinner_item,
+            strings
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            this.adapter = adapter
         }
     }
 

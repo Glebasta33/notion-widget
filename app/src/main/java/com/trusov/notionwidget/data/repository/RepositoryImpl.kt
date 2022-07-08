@@ -78,8 +78,7 @@ class RepositoryImpl @Inject constructor(
                     )
                     options.add(option)
                 }
-                // TODO: Добавить поле options: List<Option> в класс Property
-                val property = Property(name = propertyName)
+                val property = Property(name = propertyName, options = options)
                 properties.add(property)
             }
         } else {

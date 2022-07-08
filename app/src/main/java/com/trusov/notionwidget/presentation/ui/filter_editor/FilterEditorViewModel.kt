@@ -59,9 +59,9 @@ class FilterEditorViewModel @Inject constructor(
             })
     }
 
-    fun getNotes(option: String) {
+    fun getNotes(property: String, condition: String, option: String) {
         val texts = mutableListOf<String>()
-        loadNotesIds(option)
+        loadNotesIds(property, condition, option)
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .subscribe({
@@ -83,7 +83,7 @@ class FilterEditorViewModel @Inject constructor(
             })
     }
 
-    fun saveFilter(option: String, filterName: String?) {
+    fun saveFilter(property: String, condition: String, option: String, filterName: String?) {
         if (filterName.isNullOrEmpty()) {
             _state.postValue(Error("Input some name"))
             return
@@ -96,7 +96,8 @@ class FilterEditorViewModel @Inject constructor(
                         FilterRule(
                             property = Property(
                                 name = "Topic",
-                                type = Type.MULTI_SELECT
+                                type = Type.MULTI_SELECT,
+                                null // временно!
                             ),
                             condition = Condition.CONTAINS,
                             option = Option(
@@ -113,13 +114,12 @@ class FilterEditorViewModel @Inject constructor(
             .subscribe()
     }
 
-    fun saveNotes(option: String, filterName: String?) {
+    fun saveNotes(property: String, condition: String, option: String, filterName: String?) {
         if (filterName.isNullOrEmpty()) {
             _state.postValue(Error("Input some name"))
             return
         }
-        // TODO: Реализовать вставку из уже загруженного значения NotesResult
-        val noteIds = loadNotesIds(option)
+        val noteIds = loadNotesIds(property, condition, option)
         noteIds.subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .subscribe({
@@ -140,17 +140,17 @@ class FilterEditorViewModel @Inject constructor(
             })
     }
 
-    // TODO: add filter: Filter as parameter of method
-    private fun loadNotesIds(option: String) = loadPageIdsUseCase(
+    private fun loadNotesIds(property: String, condition: String, option: String) = loadPageIdsUseCase(
         application.resources.getString(R.string.zettel_db_id),
         Filter(
             rules = mutableListOf(
                 FilterRule(
                     property = Property(
-                        name = "Topic",
-                        type = Type.MULTI_SELECT
+                        name = property,
+                        type = Type.MULTI_SELECT,
+                        null
                     ),
-                    condition = Condition.CONTAINS,
+                    condition = Condition.mapStringToCondition(condition.lowercase()),
                     option = Option(
                         name = option,
                         color = "red",
@@ -160,8 +160,6 @@ class FilterEditorViewModel @Inject constructor(
             )
         )
     )
-
-    // private fun buildFilter(propertyName, propertyType: Type, condition: Condition, optionName: String, color: Color, ...): Filter {  }
 
     fun getProperties(dbId: String) {
         getPropertiesUseCase(dbId)
