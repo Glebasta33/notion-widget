@@ -1,7 +1,12 @@
 package com.trusov.notionwidget.data.retrofit
 
 import android.app.Application
+import com.google.gson.GsonBuilder
 import com.trusov.notionwidget.R
+import com.trusov.notionwidget.data.dto.filter.filter_dto.ConditionDto
+import com.trusov.notionwidget.data.dto.filter.filter_dto.ConditionSerializer
+import com.trusov.notionwidget.data.dto.filter.filter_dto.FilterDto
+import com.trusov.notionwidget.data.dto.filter.filter_dto.FilterSerializer
 import hu.akarnokd.rxjava3.retrofit.RxJava3CallAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -26,7 +31,12 @@ class ApiFactory @Inject constructor(
     }.build()
 
     private val retrofit = Retrofit.Builder()
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(GsonConverterFactory.create(
+            GsonBuilder()
+                .registerTypeAdapter(ConditionDto::class.java, ConditionSerializer())
+                .registerTypeAdapter(FilterDto::class.java, FilterSerializer())
+                .create()
+        ))
         .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
         .baseUrl(BASE_URL)
         .client(client)

@@ -1,25 +1,25 @@
 package com.trusov.notionwidget.data.mapper
 
-import com.trusov.notionwidget.data.dto.filter.FilterDto
-import com.trusov.notionwidget.data.dto.filter.FilterRuleDto
-import com.trusov.notionwidget.data.dto.filter.MultiSelectDto
+import com.trusov.notionwidget.data.dto.filter.filter_dto.FilterWrapperDto
+import com.trusov.notionwidget.data.dto.filter.filter_dto.FilterDto
+import com.trusov.notionwidget.data.dto.filter.filter_dto.ConditionDto
 import com.trusov.notionwidget.data.dto.filter.db_model.*
 import com.trusov.notionwidget.domain.entity.*
 import com.trusov.notionwidget.domain.entity.note.Note
 import javax.inject.Inject
 
 class FilterMapper @Inject constructor() {
-    fun mapEntityToDto(entity: Filter): FilterDto {
-        val filterDto = FilterDto(
-            filter = FilterRuleDto(
-                multi_select = MultiSelectDto(
-                    contains = entity.rules[0].option.name
-                ),
-                property = entity.rules[0].property.name
-            )
-        )
-        return filterDto
-    }
+//    fun mapEntityToDto(entity: Filter): FilterWrapperDto {
+//        val filterDto = FilterWrapperDto(
+//            filter = FilterDto(
+//                multi_select = ConditionDto(
+//                    contains = entity.rules[0].option.name
+//                ),
+//                property = entity.rules[0].property.name
+//            )
+//        )
+//        return filterDto
+//    }
 
     fun mapEntityToDbModel(entity: Filter) = FilterDbModel(
         name = entity.name ?: "",

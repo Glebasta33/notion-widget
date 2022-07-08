@@ -6,6 +6,9 @@ import com.google.gson.JsonObject
 import com.trusov.notionwidget.data.dto.NoteIdsDto
 import com.trusov.notionwidget.data.dto.block.BlockResponseDto
 import com.trusov.notionwidget.data.dto.filter.db_model.FilterDbModel
+import com.trusov.notionwidget.data.dto.filter.filter_dto.ConditionDto
+import com.trusov.notionwidget.data.dto.filter.filter_dto.FilterDto
+import com.trusov.notionwidget.data.dto.filter.filter_dto.FilterWrapperDto
 import com.trusov.notionwidget.data.local.FiltersDao
 import com.trusov.notionwidget.data.mapper.FilterMapper
 import com.trusov.notionwidget.data.mapper.NoteMapper
@@ -28,7 +31,18 @@ class RepositoryImpl @Inject constructor(
 ) : Repository {
 
     override fun loadPageIds(dbId: String, filter: Filter): Observable<NoteIdsDto> {
-        val filterDto = filterMapper.mapEntityToDto(filter)
+        // val filterDto = filterMapper.mapEntityToDto(filter)
+        val filterDto = FilterWrapperDto(
+            FilterDto(
+                propertyFieldName = "property",
+                propertyValue = "Topic",
+                conditionFieldName = "multi_select",
+                ConditionDto(
+                    conditionFieldName = "contains",
+                    value = "Тревога"
+                )
+            )
+        )
         return apiService.getPageIds(dbId, filterDto)
     }
 

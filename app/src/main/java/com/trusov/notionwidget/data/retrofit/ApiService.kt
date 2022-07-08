@@ -3,7 +3,7 @@ package com.trusov.notionwidget.data.retrofit
 import com.google.gson.JsonElement
 import com.trusov.notionwidget.data.dto.NoteIdsDto
 import com.trusov.notionwidget.data.dto.block.BlockResponseDto
-import com.trusov.notionwidget.data.dto.filter.FilterDto
+import com.trusov.notionwidget.data.dto.filter.filter_dto.FilterWrapperDto
 import io.reactivex.rxjava3.core.Observable
 import retrofit2.Response
 import retrofit2.http.Body
@@ -16,7 +16,7 @@ interface ApiService {
     @POST("databases/{db}/query")
     fun getPageIds(
         @Path("db") dbId: String,
-        @Body filter: FilterDto
+        @Body filter: FilterWrapperDto
     ): Observable<NoteIdsDto>
 
     @GET("blocks/{pageId}/children")
